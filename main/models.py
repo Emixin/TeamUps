@@ -1,8 +1,10 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth.models import AbstractUser
 
 
-class User(models.Model):
+
+class User(AbstractUser):
 
     CHARACTER_TYPES = [
         ('LEADER', 'Leader'),
@@ -18,7 +20,8 @@ class User(models.Model):
     skills = models.CharField(max_length=100, blank=True)
     score = models.DecimalField(max_digits=2, 
                                 decimal_places=1, 
-                                validators=[MinValueValidator(1.0), MaxValueValidator(5.0)]
+                                validators=[MinValueValidator(1.0), MaxValueValidator(5.0)],
+                                default=1.0
     )
     score_count = models.IntegerField(default=0)
     location = models.CharField(max_length=50, blank=True, null=True)
@@ -82,7 +85,8 @@ class Team(models.Model):
     leader = models.ForeignKey(User, on_delete=models.CASCADE, related_name="led_teams")
     teamwork_score = models.DecimalField(max_digits=2,
                                          decimal_places=1,
-                                         validators=[MinValueValidator(1.0), MaxValueValidator(5.0)]
+                                         validators=[MinValueValidator(1.0), MaxValueValidator(5.0)],
+                                         default=1.0
     )
     score_count = models.IntegerField(default=0)
 
