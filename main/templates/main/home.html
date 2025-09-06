@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home Page</title>
+</head>
+<body>
+    <h1>Welcome to TeamUps!</h1>
+    {% if user.is_authenticated %}
+    <p>{{ user.username }} is successfully logged in.</p>
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </from>
+
+
+    {% else %}
+    <h2>Login if you have an account</h2>
+    <a href="{% url 'login' %}"><button>Login</button></a>
+
+
+    {% endif %}
+</body>
+</html>
