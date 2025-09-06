@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+    <head><title>Dashboard</title></head>
+    <body>
+        <h1>Welcome {{user.username}}!</h1>
+
+        <p>Click below to go to your tasks list:<p>
+        <a href="{% url 'tasks' %}">Go to my tasks</a>
+
+        <br><br>
+        <a href="{% url 'logout' %}">Logout</a>
+    </body>
+</html>
