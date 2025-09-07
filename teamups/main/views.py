@@ -1,6 +1,7 @@
-from django.views.generic import ListView, FormView, DetailView
+from django.views.generic import ListView, FormView, DetailView, CreateView
 from django.contrib.auth import authenticate, get_user_model, login
 from django.contrib.auth.views import LogoutView
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages 
 from django.urls import reverse_lazy
@@ -51,6 +52,13 @@ class MyLoginView(FormView):
 
 
 
+class MySignUpView(CreateView):
+    form_class = UserCreationForm
+    template_name = 'main/signup.html'
+    success_url = reverse_lazy("login")
+
+
+
 class MyLogoutView(LogoutView):
     next_page = reverse_lazy("home")
 
@@ -60,6 +68,9 @@ class DashboardView(LoginRequiredMixin, DetailView):
     model = User
     template_name = 'main/dashboard.html'
     context_object_name = 'user'
+
+    def get_object(self):
+        return self.request.user
 
 
 
