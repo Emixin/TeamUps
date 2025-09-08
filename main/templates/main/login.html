@@ -2,9 +2,11 @@
 <html>
 <head>
     <title>Login</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'main/styles.css' %}">
 </head>
 <body>
-    <h>Login</h>
+    <h1>Login</h1>
     {% if messages %}
         <ul>
             {% for message in messages %}
