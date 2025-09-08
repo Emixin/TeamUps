@@ -1,12 +1,11 @@
 from django.views.generic import ListView, FormView, DetailView, CreateView
 from django.contrib.auth import authenticate, get_user_model, login
 from django.contrib.auth.views import LogoutView
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages 
 from django.urls import reverse_lazy
 from .models import Task, Team
-from .forms import MyLoginForm
+from .forms import MyLoginForm, MySignUpForm
 from .models import User
 from django.shortcuts import redirect
 
@@ -22,6 +21,13 @@ class HomePageView(DetailView):
 
     def get_object(self):
         return self.request.user
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['users_count'] = User.objects.count()
+        context['teams_count'] = Team.objects.count()
+        context['tasks_count'] = Task.objects.count()
+        return context
 
 
 class MyLoginView(FormView):
@@ -53,7 +59,7 @@ class MyLoginView(FormView):
 
 
 class MySignUpView(CreateView):
-    form_class = UserCreationForm
+    form_class = MySignUpForm
     template_name = 'main/signup.html'
     success_url = reverse_lazy("login")
 

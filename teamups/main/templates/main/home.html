@@ -2,11 +2,20 @@
 <html>
 <head>
     <title>Home Page</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'main/styles.css' %}">
 </head>
 <body>
     <h1>Welcome to TeamUps!</h1>
+    <p>Collaborate, organize, and succeed together</p>
+    <p>active users: {{ users_count }}</p>
+    <p>active teams: {{ teams_count }}</p>
+    <p>active tasks: {{ tasks_count }}</p>
+
+
     {% if user.is_authenticated %}
-    <p>{{ user.username }} is successfully logged in.</p>
+    <p>Welcome Back {{ user.username }}!</p>
+    <a href="{% url 'dashboard' %}">Go to your dashboard</a>
     <form action="{% url 'logout' %}" method="post">
         {% csrf_token %}
         <button type="submit">Logout</button>

@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html>
-    <head><title>Dashboard</title></head>
-    <body>
-        <h1>Welcome {{user.username}}!</h1>
+<head>
+    <title>Dashboard</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'main/styles.css' %}">
+</head>
+    
+<body>
+    <h1>Welcome {{user.username}}!</h1>
 
-        <p>Click below to go to your tasks list:<p>
-        <a href="{% url 'tasks' %}">Go to my tasks</a>
+    <p>Click below to go to your tasks list:<p>
+    <a href="{% url 'tasks' %}">Go to my tasks</a>
 
-        <br><br>
-        <form action="{% url 'logout' %}" method="post">
-        {% csrf_token %}
-        <button type="submit">Logout</button>
-    </from>
-    </body>
+    <br><br>
+    <form action="{% url 'logout' %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Logout</button>
+</from>
+</body>
 </html>
