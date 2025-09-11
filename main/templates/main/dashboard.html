@@ -12,10 +12,36 @@
     <p>Click below to go to your tasks list:<p>
     <a href="{% url 'tasks' %}">Go to my tasks</a>
 
+
+
+    <div style="display: flex; gap: 20px;">
+
+        <div style="flex: 1;">
+            <p>Create a Team</p>
+            <form method="post" action="{% url 'create_team' %}">
+            {% csrf_token %}
+            {{ team_form.as_p }}
+            <button type="submit">Create Team</button>
+            </form>
+        </div>
+
+        <div style="flex: 1;">
+            <p>Create a Task</p>
+            <form method="post" action="{% url 'create_task' %}">
+            {% csrf_token %}
+            {{ task_form.as_p }}
+            <button type="submit">Create Task</button>
+            </form>
+        </div>
+
+    </div>
+
     <br><br>
     <form action="{% url 'logout' %}" method="post">
     {% csrf_token %}
     <button type="submit">Logout</button>
-</from>
+    </form>
+
+    <a href="{% url 'home' %}">Go back to Home</a>
 </body>
 </html>

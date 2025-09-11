@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages 
 from django.urls import reverse_lazy
 from .models import Task, Team
-from .forms import MyLoginForm, MySignUpForm
+from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm
 from .models import User
 from django.shortcuts import redirect
 
@@ -49,7 +49,6 @@ class MyLoginView(FormView):
 
         if user:
             login(self.request, user)
-            messages.success(self.request, f"Welcome {user.username}")
             return redirect('home')
 
 
@@ -77,8 +76,13 @@ class DashboardView(LoginRequiredMixin, DetailView):
 
     def get_object(self):
         return self.request.user
-
-
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["team_form"] = TeamForm()
+        context["task_form"] = TaskForm()
+        return context
+ 
 
 class TaskListView(LoginRequiredMixin, ListView):
     model = Task
@@ -87,6 +91,41 @@ class TaskListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
-        user_team = Team.objects.filter(members=user)
-        return Task.objects.filter(team__in=user_team)
+        user_teams = Team.objects.filter(members=user)
+        return Task.objects.filter(team__in=user_teams)
+    
+
+
+class TeamCreateView(LoginRequiredMixin, CreateView):
+    model = Team
+    form_class = TeamForm
+    success_url = reverse_lazy('dashboard')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self.object.members.add(self.request.user)
+
+        leader = form.cleaned_data["leader"]
+        if leader not in self.object.members.all():
+            self.object.members.add(leader)
+
+        return response
+    
+    
+
+class TaskCreateView(LoginRequiredMixin, CreateView):
+    model = Task
+    form_class = TaskForm
+    success_url = reverse_lazy('dashboard')
+
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        task = form.save(commit=False)
+        task.created_by = self.request.user
+        return super().form_valid(form)
 
