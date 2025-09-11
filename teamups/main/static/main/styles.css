@@ -59,3 +59,16 @@ a {
 form {
     margin-top: 20px;
 }
+
+
+.forms-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+
+.forms-container > div {
+  flex: 1;
+  min-width: 300px;
+}
