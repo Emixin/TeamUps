@@ -31,7 +31,7 @@ class User(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-
+    # i should use these methods in views.py later
     def calculate_new_score(self, new_score):
         self.score_count += 1
         self.score = (self.score * (self.score_count - 1) + new_score) / (self.score_count)
@@ -68,6 +68,7 @@ class Task(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+    # i should use these methods in views.py later
     def renew_deadline(self, extra_time):
         self.deadline += extra_time
         self.save()
@@ -94,6 +95,7 @@ class Team(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+    # i should use these methods in views.py later
     def recalculate_teamwork_score(self, new_team_score):
         self.score_count += 1
         self.teamwork_score = (self.teamwork_score * (self.score_count - 1) + new_team_score) / (self.score_count)
@@ -116,5 +118,5 @@ class Team(models.Model):
         
     def __str__(self):
         return self.name
-        
+    
     

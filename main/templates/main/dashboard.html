@@ -12,25 +12,26 @@
     <p>Click below to go to your tasks list:<p>
     <a href="{% url 'tasks' %}">Go to my tasks</a>
 
-
+    <p>Click below to go to your teams list:<p>
+    <a href="{% url 'teams' %}">Go to my teams</a>
 
     <div style="display: flex; gap: 20px;">
 
         <div style="flex: 1;">
             <p>Create a Team</p>
-            <form method="post" action="{% url 'create_team' %}">
+            <form method="post">
             {% csrf_token %}
             {{ team_form.as_p }}
-            <button type="submit">Create Team</button>
+            <button type="submit", name="create_team">Create Team</button>
             </form>
         </div>
 
         <div style="flex: 1;">
             <p>Create a Task</p>
-            <form method="post" action="{% url 'create_task' %}">
+            <form method="post">
             {% csrf_token %}
             {{ task_form.as_p }}
-            <button type="submit">Create Task</button>
+            <button type="submit", name="create_task">Create Task</button>
             </form>
         </div>
 
