@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tasks List</title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'main/styles.css' %}">
+</head>
+<body>
+
+    <h1>All Teams</h1>
+    <ul>
+      {% for team in teams %}
+        <li>name: {{ team.name }} - members: {{ team.members }} - leader: {{ team.leader }}</li>
+      {% empty %}
+        <li>No teams found.</li>
+      {% endfor %}
+    </ul>
+
+</body>
+</html>

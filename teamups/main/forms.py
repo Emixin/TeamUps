@@ -34,7 +34,7 @@ class TaskForm(forms.ModelForm):
 
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.get("user")
+        led_teams = kwargs.pop("user_led_teams", Team.objects.none())
         super().__init__(*args, **kwargs)
-        self.fields["team"].queryset = Team.objects.filter(members=user)
+        self.fields["team"].queryset = led_teams
 

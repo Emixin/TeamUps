@@ -79,10 +79,48 @@ class DashboardView(LoginRequiredMixin, DetailView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        user = self.request.user
         context["team_form"] = TeamForm()
-        context["task_form"] = TaskForm()
+        context["task_form"] = TaskForm(user_led_teams=Team.objects.filter(leader=user))
         return context
- 
+    
+    def post(self, request):
+        user = self.request.user
+
+        if "create_task" in request.POST:
+            task_form = TaskForm(request.POST, user_led_teams=Team.objects.filter(leader=user))
+
+            if task_form.is_valid():
+                task = task_form.save(commit=False)
+                task.created_by = user
+                task.save()
+                return redirect('dashboard')
+            
+        else:
+            task_form = TaskForm(user_led_teams=Team.objects.filter(leader=user))
+
+        
+        if "create_team" in request.POST:
+            team_form = TeamForm(request.POST)
+            
+            if team_form.is_valid():
+                team = team_form.save()
+                team.members.add(user)
+                if team.leader not in team.members.all():
+                    team.members.add(team.leader)
+                
+                return redirect('dashboard')
+            
+            else:
+                team_form = TeamForm()
+       
+            context = self.get_context_data()
+            context["task_form"] = task_form
+            context["team_form"] = team_form
+            return self.render_to_response(context)
+
+
+
 
 class TaskListView(LoginRequiredMixin, ListView):
     model = Task
@@ -95,37 +133,13 @@ class TaskListView(LoginRequiredMixin, ListView):
         return Task.objects.filter(team__in=user_teams)
     
 
-
-class TeamCreateView(LoginRequiredMixin, CreateView):
+# it seems the user's teams list is not correct
+class TeamListView(LoginRequiredMixin, ListView):
     model = Team
-    form_class = TeamForm
-    success_url = reverse_lazy('dashboard')
+    template_name = 'main/teams_list.html'
+    context_object_name = 'teams'
 
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        self.object.members.add(self.request.user)
-
-        leader = form.cleaned_data["leader"]
-        if leader not in self.object.members.all():
-            self.object.members.add(leader)
-
-        return response
-    
-    
-
-class TaskCreateView(LoginRequiredMixin, CreateView):
-    model = Task
-    form_class = TaskForm
-    success_url = reverse_lazy('dashboard')
-
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["user"] = self.request.user
-        return kwargs
-
-    def form_valid(self, form):
-        task = form.save(commit=False)
-        task.created_by = self.request.user
-        return super().form_valid(form)
+    def get_queryset(self):
+        user = self.request.user
+        return Team.objects.filter(members=user)
 
