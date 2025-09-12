@@ -8,13 +8,21 @@
 <body>
 
     <h1>All Teams</h1>
-    <ul>
-      {% for team in teams %}
-        <li>name: {{ team.name }} - members: {{ team.members }} - leader: {{ team.leader }}</li>
-      {% empty %}
-        <li>No teams found.</li>
-      {% endfor %}
-    </ul>
+
+    {% for team in teams %}
+      <li>
+        - name: {{ team.name }}
+        
+        - members: 
+        {% for member in team.members.all %}
+          {{ member.username }}{% if not forloop.last %}, {% endif %}
+        {% empty %}
+          No members
+        {% endfor %}
+
+        - leader: {{ team.leader.username }}
+      </li>
+    {% endfor %}
 
 </body>
 </html>
