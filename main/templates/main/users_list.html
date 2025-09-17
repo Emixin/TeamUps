@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Users List</title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'main/styles.css' %}">
+</head>
+<body>
+
+    <h1>All TeamUps Users</h1>
+
+    {% for user in users %}
+      <li>
+        - name: {{ user.username }}
+        - rating: {{ user.score|default:"No ratings yet" }}
+        <form method="post" style="display:inline">
+            {% csrf_token %}
+            <input type="hidden" name="rated_user" value="{{ user.username }}">
+            <input type="number" name="score" min="1" max="5" required>
+            <button type="submit">Rate</button>
+        </form>
+      </li>
+    {% endfor %}
+
+    <a href="{% url 'dashboard' %}">Return</a>
+</body>
+</html>

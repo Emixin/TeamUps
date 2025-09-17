@@ -12,17 +12,19 @@
     {% for team in teams %}
       <li>
         - name: {{ team.name }}
-        
-        - members: 
-        {% for member in team.members.all %}
-          {{ member.username }}{% if not forloop.last %}, {% endif %}
-        {% empty %}
-          No members
-        {% endfor %}
+        - score: {{ team.teamwork_score }}
+        <form method="post" style="display: inline">
+          {% csrf_token %}
+          <input type="hidden" name="rated_team" value="{{ team.name }}">
+          <input type="number" name="score" min="1" max="5" required>
+          <button type="submit">Rate</button>
+        </form>
 
         - leader: {{ team.leader.username }}
+        <a href="{% url 'team_details' team.pk %}">View details</a>
       </li>
     {% endfor %}
 
+    <a href="{% url 'dashboard' %}">Return</a>
 </body>
 </html>

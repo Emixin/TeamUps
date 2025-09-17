@@ -133,7 +133,21 @@ class TaskListView(LoginRequiredMixin, ListView):
         return Task.objects.filter(team__in=user_teams)
     
 
-# it seems the user's teams list is not correct
+    def post(self, request):
+        extra_time = request.POST.get("extra_time")
+        task_title = request.POST.get("task_title")
+
+        user = self.request.user
+        task = Task.objects.filter(title=task_title)
+        task_obj = list(task)[0]
+        user_created = task_obj.created_by
+
+        if user == user_created:
+            task_obj.deadline = task_obj.renew_deadline(extra_time)
+            return redirect('tasks')
+
+
+
 class TeamListView(LoginRequiredMixin, ListView):
     model = Team
     template_name = 'main/teams_list.html'
@@ -142,4 +156,69 @@ class TeamListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         user = self.request.user
         return Team.objects.filter(members=user)
+    
+    def post(self, request):
+        team_name = request.POST.get("rated_team")
+        team = Team.objects.filter(name=team_name)
+        team_obj = list(team)[0]
+        new_score = request.POST.get("score")
+        team_obj.recalculate_teamwork_score(new_score)
+        return redirect('teams')
 
+
+
+class TeamDetailsView(LoginRequiredMixin, DetailView):
+    model = Team
+    template_name = 'main/team_details.html'
+    context_object_name = 'team'
+
+
+    def post(self, request, **kwargs):
+        user = request.user
+        team_title = request.POST.get("title")
+        team = Team.objects.filter(name=team_title)
+        team_obj = list(team)[0]
+        team_leader = team_obj.leader
+
+        selected_user = request.POST.get("member")
+        selected_user_qsobj = User.objects.filter(username=selected_user)
+        selected_user_obj = list(selected_user_qsobj)[0]
+        action = request.POST.get("action")
+
+        team_id = kwargs.get("pk")
+        if action == "add" and user == team_leader:
+            team_obj.add_member(selected_user_obj)
+            team_obj.save()
+            return redirect('team_details', pk=team_id)
+
+        elif action == "remove" and user == team_leader:
+            team_obj.remove_member(selected_user_obj)
+            team_obj.save()
+            return redirect('team_details', pk=team_id)
+        
+        return redirect('team_details', pk=team_id)
+
+
+class UsersRatingList(LoginRequiredMixin, ListView):
+    model = User
+    template_name = 'main/users_list.html'
+    context_object_name = 'users'
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        users = User.objects.filter(is_superuser=False)
+        users = users.exclude(username=self.request.user)
+        context['users'] = users
+        return context
+    
+    def post(self, request):
+        new_score = request.POST.get("score")
+        rated_user = request.POST.get("rated_user")
+
+        if new_score and rated_user:
+            rated_user = User.objects.filter(username=rated_user)
+            rated_user_obj = list(rated_user)[0]
+            rated_user_obj.score = rated_user_obj.calculate_new_score(int(new_score))
+            return redirect('ratings')
+            

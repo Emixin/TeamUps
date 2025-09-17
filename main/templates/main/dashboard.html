@@ -8,6 +8,7 @@
     
 <body>
     <h1>Welcome {{user.username}}!</h1>
+    <p>Your Average Score: {{ user.score|default:"No ratings yet" }}</p>
 
     <p>Click below to go to your tasks list:<p>
     <a href="{% url 'tasks' %}">Go to my tasks</a>
@@ -43,6 +44,8 @@
     <button type="submit">Logout</button>
     </form>
 
+    <a href="{% url 'ratings' %}">Other users</a>
+    <br>
     <a href="{% url 'home' %}">Go back to Home</a>
 </body>
 </html>
