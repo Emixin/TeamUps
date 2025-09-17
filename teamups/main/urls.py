@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import TaskListView, TeamListView, HomePageView, MyLoginView, MyLogoutView
-from .views import DashboardView, MySignUpView
+from .views import DashboardView, MySignUpView, UsersRatingList, TeamDetailsView
 
 
 urlpatterns = [
@@ -11,4 +11,6 @@ urlpatterns = [
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
     path('tasks/', TaskListView.as_view(), name='tasks'),
     path('teams/', TeamListView.as_view(), name='teams'),
+    path('users/', UsersRatingList.as_view(), name='ratings'),
+    path('teams/details/<int:pk>/', TeamDetailsView.as_view(), name='team_details'),
 ]

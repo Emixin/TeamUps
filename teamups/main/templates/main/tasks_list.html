@@ -8,13 +8,22 @@
 <body>
 
     <h1>All Tasks</h1>
-    <ul>
-      {% for task in tasks %}
-        <li>{{ task.title }} - {{ task.status }}</li>
-      {% empty %}
-        <li>No tasks found.</li>
-      {% endfor %}
-    </ul>
 
+    {% for task in tasks %}
+      <li>
+        - title: {{ task.title }}
+        - team: {{ task.team }}
+        - creator: {{ task.created_by }}
+        - deadline: {{ task.deadline }}
+        <form method="post" style="display:inline">
+            {% csrf_token %}
+            <input type="hidden" name="task_title" value="{{ task.title }}">
+            <input type="number" name="extra_time" required>Enter extra days amount
+            <button type="submit">Set New Deadline</button>
+        </form>
+      </li>
+    {% endfor %}
+
+    <a href="{% url 'dashboard' %}">Return</a>
 </body>
 </html>

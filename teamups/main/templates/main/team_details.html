@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Team Details</title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'main/styles.css' %}">
+</head>
+<body>
+
+    <h1>Team Details</h1>
+
+      <h3>{{ team.name }}</h3>
+      <p>Leader: {{ team.leader.username }}</p>
+      <p>Max Members: {{ team.max_members }}</p>
+
+      <h3>Members:</h3>
+      <ul>
+        {% for member in team.members.all %}
+          <li>{{ member.username }}</li>
+        {% empty %}
+          <li>No members yet.</li>
+        {% endfor %}
+      </ul>
+
+      <h3>Add or Remove a member</h3>
+      <form method="post" style="display: inline">
+        {% csrf_token %}
+        <input type="hidden" name="title" value="{{ team.name }}">
+        <input type="text" name="member">username
+        <br>
+        <label for="action">select action</label>
+          <select name="action" id="action">
+            <option value="">-- choose an action --</option>
+            <option value="add">add</option>
+            <option value="remove">remove</option>
+          </select>
+        <br>
+        <button type="submit">submit</button>
+      </form>
+      <br><br>
+    <a href="{% url 'dashboard' %}">Return</a>
+</body>
+</html>

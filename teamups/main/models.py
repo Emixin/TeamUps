@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
+from datetime import timedelta
 
 
 
@@ -21,26 +22,20 @@ class User(AbstractUser):
     score = models.DecimalField(max_digits=2, 
                                 decimal_places=1, 
                                 validators=[MinValueValidator(1.0), MaxValueValidator(5.0)],
-                                default=1.0
+                                null=True, blank=True
     )
     score_count = models.IntegerField(default=0)
-    location = models.CharField(max_length=50, blank=True, null=True)
     is_available = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 
-    # i should use these methods in views.py later
     def calculate_new_score(self, new_score):
         self.score_count += 1
         self.score = (self.score * (self.score_count - 1) + new_score) / (self.score_count)
         self.save()
         return self.score
     
-
-    def get_location(self):
-        return self.location if self.location else "Location not set"
     
     def __str__(self):
         return self.username
@@ -65,12 +60,10 @@ class Task(models.Model):
     status = models.CharField(max_length=20, choices=[('completed','Completed'), ('pending','PENDING')], default='PENDING')
 
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
-
-    # i should use these methods in views.py later
     def renew_deadline(self, extra_time):
-        self.deadline += extra_time
+        extra_time = int(extra_time)
+        self.deadline += timedelta(days=extra_time)
         self.save()
         return f"new deadline is {self.deadline}"
     
@@ -87,21 +80,17 @@ class Team(models.Model):
     teamwork_score = models.DecimalField(max_digits=2,
                                          decimal_places=1,
                                          validators=[MinValueValidator(1.0), MaxValueValidator(5.0)],
-                                         default=1.0
+                                         null=True, blank=True
     )
     score_count = models.IntegerField(default=0)
-
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
-
-    # i should use these methods in views.py later
     def recalculate_teamwork_score(self, new_team_score):
         self.score_count += 1
-        self.teamwork_score = (self.teamwork_score * (self.score_count - 1) + new_team_score) / (self.score_count)
+        self.teamwork_score = (self.teamwork_score * (self.score_count - 1) + int(new_team_score)) / (self.score_count)
         self.save()
         return self.teamwork_score
-    
+
     def add_member(self, user):
         usersname_list = [member.username for member in self.members.all()]
         if user.username not in usersname_list and self.members.count() < self.max_members:
@@ -118,5 +107,4 @@ class Team(models.Model):
         
     def __str__(self):
         return self.name
-    
     
