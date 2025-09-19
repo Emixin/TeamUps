@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User's Invitations</title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'main/styles.css' %}">
+</head>
+<body>
+
+    <h1>Invitations</h1>
+    {% for invitation in invitations %}
+        <p>invited_by: {{ invitation.invited_by }} status: {{ invitation.status }}</p>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="invitation_team" value="{{ invitation.team }}">
+            <input type="hidden" name="invited_user" value="{{ invitation.invited_user }}">
+            <input type="hidden" name="invited_by" value="{{ invitation.invited_by }}">
+
+             <button type="submit" name="invitation_result" value="accept">
+                Accept Invitation
+            </button>
+
+            <button type="submit" name="invitation_result" value="reject">
+                Reject Invitation
+            </button>
+        </form>
+
+    {% endfor %}
+
+    <a href="{% url 'dashboard' %}">Return</a>
+</body>
+</html>
