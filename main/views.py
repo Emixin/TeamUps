@@ -4,9 +4,8 @@ from django.contrib.auth.views import LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages 
 from django.urls import reverse_lazy
-from .models import Task, Team
+from .models import Task, Team, User, Invitation
 from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm
-from .models import User
 from django.shortcuts import redirect
 
 
@@ -121,6 +120,43 @@ class DashboardView(LoginRequiredMixin, DetailView):
 
 
 
+class UserInvitationList(LoginRequiredMixin, ListView):
+    model = Invitation
+    template_name = 'main/user_invitations.html'
+    context_object_name = 'invitations'
+
+    def get_queryset(self):
+        user = self.request.user
+        user_invitations = Invitation.objects.filter(invited_user=user)
+        return user_invitations
+    
+    def post(self, request, **kwargs):
+        result = request.POST.get("invitation_result")
+        invitation_team = request.POST.get("invitation_team")
+        invitation_team = Team.objects.filter(name=invitation_team).first()
+
+        invited_user = request.POST.get("invited_user")
+        invited_user = User.objects.filter(username=invited_user).first()
+
+
+        invited_by = request.POST.get("invited_by")
+        invited_by = User.objects.filter(username=invited_by).first()
+
+        invitation = Invitation.objects.filter(team=invitation_team, invited_user=invited_user, invited_by=invited_by).first()
+
+        if result == "accept":
+            invitation.accept()
+
+        if result == "reject":
+            invitation.decline()
+        
+        invitation.save()
+
+        user_id = kwargs.get("pk")
+        return redirect('invitations', pk=user_id)
+
+
+
 
 class TaskListView(LoginRequiredMixin, ListView):
     model = Task
@@ -187,8 +223,9 @@ class TeamDetailsView(LoginRequiredMixin, DetailView):
 
         team_id = kwargs.get("pk")
         if action == "add" and user == team_leader:
-            team_obj.add_member(selected_user_obj)
-            team_obj.save()
+            invitation = Invitation.objects.create(team=team_obj, invited_user=selected_user_obj, 
+                                                   invited_by=team_leader)
+            invitation.save()
             return redirect('team_details', pk=team_id)
 
         elif action == "remove" and user == team_leader:

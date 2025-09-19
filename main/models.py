@@ -108,3 +108,33 @@ class Team(models.Model):
     def __str__(self):
         return self.name
     
+
+
+class Invitation(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('ACCEPTED', 'Accepted'),
+        ('DECLINED', 'Declined'),
+    ]
+
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='invitations')
+    invited_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='got_invitations')
+    invited_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_invitations')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def accept(self):
+        if self.status == 'PENDING' and self.team.members.count() < self.team.max_members:
+            self.team.add_member(self.invited_user)
+            self.status = 'ACCEPTED'
+            self.save()
+            return f"user {self.invited_user} joined the team!"
+        return "Invitation already handled or team is full"
+
+    def decline(self):
+        if self.status == 'PENDING':
+            self.status = 'DECLINED'
+            self.save()
+            return f"user {self.invited_user} declined the invitation!"
+        return "Invitation already handled"
+
