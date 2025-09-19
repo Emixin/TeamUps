@@ -23,7 +23,7 @@ class HomePageView(DetailView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['users_count'] = User.objects.count()
+        context['users_count'] = User.objects.filter(is_superuser=False).count()
         context['teams_count'] = Team.objects.count()
         context['tasks_count'] = Task.objects.count()
         return context

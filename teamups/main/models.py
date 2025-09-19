@@ -87,7 +87,10 @@ class Team(models.Model):
 
     def recalculate_teamwork_score(self, new_team_score):
         self.score_count += 1
-        self.teamwork_score = (self.teamwork_score * (self.score_count - 1) + int(new_team_score)) / (self.score_count)
+        if self.teamwork_score:
+            self.teamwork_score = (self.teamwork_score * (self.score_count - 1) + int(new_team_score)) / (self.score_count)
+        else:
+            self.teamwork_score = new_team_score
         self.save()
         return self.teamwork_score
 
