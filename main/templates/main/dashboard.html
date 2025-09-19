@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Dashboard</title>
     {% load static %}
@@ -7,47 +8,52 @@
 </head>
     
 <body>
-    <h1>Welcome {{user.username}}!</h1>
-    <p>Your Average Score: {{ user.score|default:"No ratings yet" }}</p>
+    <div class="dashboard-container">
 
-    <p>Click below to go to your tasks list:<p>
-    <a href="{% url 'tasks' %}">Go to my tasks</a>
+        <div class="welcome-average-score">
+            <div class="welcome">
+                <h1>Welcome {{ user.username }}!</h1>
+            </div>
+        
+            <div class="average-score">
+                <p>Your Average Score: {{ user.score|default:"No ratings yet" }}</p>
+            </div>
+        </div>
+        
 
-    <p>Click below to go to your teams list:<p>
-    <a href="{% url 'teams' %}">Go to my teams</a>
-
-    <div style="display: flex; gap: 20px;">
-
-        <div style="flex: 1;">
-            <p>Create a Team</p>
-            <form method="post">
-            {% csrf_token %}
-            {{ team_form.as_p }}
-            <button type="submit", name="create_team">Create Team</button>
-            </form>
+        <div class="dashboard-links">
+            <a href="{% url 'tasks' %}">My Tasks</a>
+            <a href="{% url 'teams' %}">My Teams</a>
+            <a href="{% url 'ratings' %}">Other Users</a>
+            <a href="{% url 'invitations' user.pk %}">Invitations</a>
+            <a href="{% url 'home' %}">Home</a>
         </div>
 
-        <div style="flex: 1;">
-            <p>Create a Task</p>
-            <form method="post">
-            {% csrf_token %}
-            {{ task_form.as_p }}
-            <button type="submit", name="create_task">Create Task</button>
-            </form>
+        <div class="forms-row">
+            <div class="form-card">
+                <p>Create a Team</p>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ team_form.as_p }}
+                    <button type="submit" name="create_team">Create Team</button>
+                </form>
+            </div>
+
+            <div class="form-card">
+                <p>Create a Task</p>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ task_form.as_p }}
+                    <button type="submit" name="create_task">Create Task</button>
+                </form>
+            </div>
         </div>
 
+        <form action="{% url 'logout' %}" method="post" class="logout-form">
+            {% csrf_token %}
+            <button type="submit">Logout</button>
+        </form>
     </div>
-
-    <br><br>
-    <form action="{% url 'logout' %}" method="post">
-    {% csrf_token %}
-    <button type="submit">Logout</button>
-    </form>
-
-    <a href="{% url 'ratings' %}">Other users</a>
-    <br>
-    <a href="{% url 'invitations' user.pk %}">Your Invitations</a>
-    <br>
-    <a href="{% url 'home' %}">Go back to Home</a>
 </body>
+
 </html>

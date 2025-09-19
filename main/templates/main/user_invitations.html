@@ -9,24 +9,31 @@
 
     <h1>Invitations</h1>
     {% for invitation in invitations %}
-        <p>invited_by: {{ invitation.invited_by }} status: {{ invitation.status }}</p>
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="invitation_team" value="{{ invitation.team }}">
-            <input type="hidden" name="invited_user" value="{{ invitation.invited_user }}">
-            <input type="hidden" name="invited_by" value="{{ invitation.invited_by }}">
+        <div class="invitation-card">
+            <p class="invitation-details">
+                Invited by: <strong>{{ invitation.invited_by }}</strong> | 
+                Status: <span>{{ invitation.status }}</span>
+            </p>
 
-             <button type="submit" name="invitation_result" value="accept">
-                Accept Invitation
-            </button>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="invitation_team" value="{{ invitation.team }}">
+                <input type="hidden" name="invited_user" value="{{ invitation.invited_user }}">
+                <input type="hidden" name="invited_by" value="{{ invitation.invited_by }}">
 
-            <button type="submit" name="invitation_result" value="reject">
-                Reject Invitation
-            </button>
-        </form>
-
+                <div class="invitation-actions">
+                    <button type="submit" name="invitation_result" value="accept">
+                        Accept
+                    </button>
+                    <button type="submit" name="invitation_result" value="reject" class="reject">
+                        Reject
+                    </button>
+                </div>
+            </form>
+        </div>
     {% endfor %}
 
-    <a href="{% url 'dashboard' %}">Return</a>
+    <a href="{% url 'dashboard' %}" class="return-link">Return</a>
+
 </body>
 </html>

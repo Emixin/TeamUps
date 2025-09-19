@@ -1,33 +1,49 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Home Page</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'main/styles.css' %}">
 </head>
+
 <body>
-    <h1>Welcome to TeamUps!</h1>
-    <p>Collaborate, organize, and succeed together</p>
-    <p>active users: {{ users_count }}</p>
-    <p>active teams: {{ teams_count }}</p>
-    <p>active tasks: {{ tasks_count }}</p>
+    <div class="home-container">
+        <h1>Welcome to TeamUps!</h1>
+        <p>Collaborate, organize, and succeed together</p>
 
+        <div class="home-stats">
+            <div class="stat-box">Active users: {{ users_count }}</div>
+            <div class="stat-box">Active teams: {{ teams_count }}</div>
+            <div class="stat-box">Active tasks: {{ tasks_count }}</div>
+        </div>
 
-    {% if user.is_authenticated %}
-    <p>Welcome Back {{ user.username }}!</p>
-    <a href="{% url 'dashboard' %}">Go to your dashboard</a>
-    <form action="{% url 'logout' %}" method="post">
-        {% csrf_token %}
-        <button type="submit">Logout</button>
-    </from>
+        {% if user.is_authenticated %}
+            <p>Welcome Back <strong>{{ user.username }}</strong>!</p>
+            
+            <div class="dashboard-link">
+                <a href="{% url 'dashboard' %}">Go to your dashboard</a>
+            </div>
 
+            <form action="{% url 'logout' %}" method="post" style="margin-top:20px;">
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+            
+        {% else %}
+            <h2>Login if you have an account</h2>
 
-    {% else %}
-    <h2>Login if you have an account</h2>
-    <a href="{% url 'login' %}"><button>Login</button></a>
-    <h2>SignUp if you don't have an account</h2>
-    <a href="{% url 'signup' %}"><button>SignUp</button></a>
+            <div class="auth-buttons">
+                <a href="{% url 'login' %}"><button>Login</button></a>
+            </div>
 
-    {% endif %}
+            <h2>SignUp if you don't have an account</h2>
+            <div class="auth-buttons">
+                <a href="{% url 'signup' %}"><button>SignUp</button></a>
+            </div>
+
+        {% endif %}
+    </div>
 </body>
+
 </html>
