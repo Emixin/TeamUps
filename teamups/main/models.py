@@ -131,6 +131,9 @@ class Invitation(models.Model):
             self.team.add_member(self.invited_user)
             self.status = 'ACCEPTED'
             self.save()
+
+            Notification.objects.create(user=self.invited_user, message=f"{self.invited_user} has accepted the invite to {self.team}")
+
             return f"user {self.invited_user} joined the team!"
         return "Invitation already handled or team is full"
 
@@ -138,6 +141,23 @@ class Invitation(models.Model):
         if self.status == 'PENDING':
             self.status = 'DECLINED'
             self.save()
+
+            Notification.objects.create(user=self.invited_user, message=f"{self.invited_user} has declined the invite to {self.team}")
+
             return f"user {self.invited_user} declined the invitation!"
         return "Invitation already handled"
+
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    message = models.CharField(max_length=25)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def mark_as_read(self):
+        if self.is_read == False:
+            self.is_read = True
+            self.save()
+            return f"user {self.user} has read the notification"
 

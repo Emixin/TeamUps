@@ -12,7 +12,7 @@
     {% for team in teams %}
       <li>
         - name: {{ team.name }}
-        - score: {{ team.teamwork_score }}
+        - score: {{ team.teamwork_score|default:"No scores yet!" }}
         <form method="post" style="display: inline">
           {% csrf_token %}
           <input type="hidden" name="rated_team" value="{{ team.name }}">
@@ -21,10 +21,10 @@
         </form>
 
         - leader: {{ team.leader.username }}
-        <a href="{% url 'team_details' team.pk %}">View details</a>
+        <a href="{% url 'team_details' team.pk %}" class="team-details">View details</a>
       </li>
     {% endfor %}
 
-    <a href="{% url 'dashboard' %}">Return</a>
+    <a href="{% url 'dashboard' %}" class="return-link">Return</a>
 </body>
 </html>

@@ -4,7 +4,7 @@ from django.contrib.auth.views import LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages 
 from django.urls import reverse_lazy
-from .models import Task, Team, User, Invitation
+from .models import Task, Team, User, Invitation, Notification
 from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm
 from django.shortcuts import redirect
 
@@ -226,6 +226,10 @@ class TeamDetailsView(LoginRequiredMixin, DetailView):
             invitation = Invitation.objects.create(team=team_obj, invited_user=selected_user_obj, 
                                                    invited_by=team_leader)
             invitation.save()
+
+            notification = Notification.objects.create(user=selected_user_obj, message=f"{team_leader} has invited you to {team_obj}")
+            notification.save()
+
             return redirect('team_details', pk=team_id)
 
         elif action == "remove" and user == team_leader:
@@ -259,3 +263,15 @@ class UsersRatingList(LoginRequiredMixin, ListView):
             rated_user_obj.score = rated_user_obj.calculate_new_score(int(new_score))
             return redirect('ratings')
             
+
+
+class NotificationsView(LoginRequiredMixin, ListView):
+    model = Notification
+    template_name = "main/notifications.html"
+    context_object_name = "notifications"
+
+    def get_queryset(self):
+        user = self.request.user
+        notifications = Notification.objects.filter(user=user)
+        return notifications
+
