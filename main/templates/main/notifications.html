@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notifications</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'main/styles.css' %}">
+</head>
+<body>
+    <div class="notifications-container">
+        <ul>
+        {% for notification in notifications %}
+            <li {% if not notification.is_read %}style="font-weight: bold;"{% endif %}>
+            {{ notification.message }} <small>({{ notification.created_at|date:"Y-m-d H:i" }}) 🔔</small>
+            </li>
+        {% empty %}
+            <li>No notifications yet 🎉</li>
+        {% endfor %}
+        </ul>
+    </div>
+    <a href="{% url 'dashboard' %}" class="return-link">Return</a>
+</body>
+</html>
