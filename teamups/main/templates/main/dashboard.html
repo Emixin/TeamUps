@@ -50,6 +50,14 @@
             </div>
         </div>
 
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li class="{{ meesage.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
         <form action="{% url 'logout' %}" method="post" class="logout-form">
             {% csrf_token %}
             <button type="submit">Logout</button>

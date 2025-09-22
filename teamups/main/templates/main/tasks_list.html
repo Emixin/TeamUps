@@ -22,7 +22,18 @@
             <button type="submit">Set New Deadline</button>
         </form>
       </li>
+    
+    {% empty %}
+      <p>No Tasks yet!</p>
     {% endfor %}
+
+    {% if messages %}
+      <ul>
+        {% for message in messages %}
+          <li class="{{ meesage.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
 
     <a href="{% url 'dashboard' %}" class="return-link">Return</a>
 </body>

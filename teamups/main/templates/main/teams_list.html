@@ -23,6 +23,8 @@
         - leader: {{ team.leader.username }}
         <a href="{% url 'team_details' team.pk %}" class="team-details">View details</a>
       </li>
+    {% empty %}
+      <p>You don't belong to any team yet!</p>
     {% endfor %}
 
     <a href="{% url 'dashboard' %}" class="return-link">Return</a>

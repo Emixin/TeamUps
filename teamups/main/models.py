@@ -155,6 +155,7 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # use this in views later
     def mark_as_read(self):
         if self.is_read == False:
             self.is_read = True
