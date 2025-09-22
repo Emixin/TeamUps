@@ -93,6 +93,7 @@ class DashboardView(LoginRequiredMixin, DetailView):
                 task = task_form.save(commit=False)
                 task.created_by = user
                 task.save()
+                messages.success(request, "New task created!")
                 return redirect('dashboard')
             
         else:
@@ -108,6 +109,7 @@ class DashboardView(LoginRequiredMixin, DetailView):
                 if team.leader not in team.members.all():
                     team.members.add(team.leader)
                 
+                messages.success(request, "New team created!")
                 return redirect('dashboard')
             
             else:
@@ -145,10 +147,16 @@ class UserInvitationList(LoginRequiredMixin, ListView):
         invitation = Invitation.objects.filter(team=invitation_team, invited_user=invited_user, invited_by=invited_by).first()
 
         if result == "accept":
-            invitation.accept()
+            if invitation.status == "PENDING":
+                invitation.accept()
+                messages.success(request, "Accepted!")
+            messages.error(request, "Invitation is already answered!")
 
         if result == "reject":
-            invitation.decline()
+            if invitation.status == "PENDING":
+                invitation.decline()
+                messages.success(request, "Rejected!")
+            messages.error(request, "Invitation is already answered!")
         
         invitation.save()
 
@@ -180,7 +188,10 @@ class TaskListView(LoginRequiredMixin, ListView):
 
         if user == user_created:
             task_obj.deadline = task_obj.renew_deadline(extra_time)
+            messages.success(request, "Deadline is successfully changed")
             return redirect('tasks')
+        messages.error(request, "You must be team leader to do that!")
+        return redirect('tasks')
 
 
 
@@ -257,11 +268,18 @@ class UsersRatingList(LoginRequiredMixin, ListView):
         new_score = request.POST.get("score")
         rated_user = request.POST.get("rated_user")
 
-        if new_score and rated_user:
-            rated_user = User.objects.filter(username=rated_user)
-            rated_user_obj = list(rated_user)[0]
-            rated_user_obj.score = rated_user_obj.calculate_new_score(int(new_score))
+        rated_user = User.objects.filter(username=rated_user).first()
+        rated_user_teams = Team.objects.filter(members=rated_user)
+
+        user = request.user
+        user_teams = Team.objects.filter(members=user)
+
+        if new_score and rated_user and rated_user_teams.intersection(user_teams).exists():
+            rated_user.score = rated_user.calculate_new_score(int(new_score))
             return redirect('ratings')
+        
+        messages.error(request, "You are not in the same team!")
+        return redirect('ratings')
             
 
 
