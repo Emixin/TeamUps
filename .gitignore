@@ -1,0 +1,4 @@
+.vs/
+venv312/
+__pycache__/
+migrations/
