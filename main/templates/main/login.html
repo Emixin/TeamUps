@@ -15,10 +15,14 @@
         </ul>
     {% endif %}
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">submit</button>
-    </form>
+    
+    <div class="dashboard-links">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">submit</button>
+        </form>
+        <a href="{% url 'home' %}">Home</a>
+    </div>
 </body>
 </html>

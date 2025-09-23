@@ -12,9 +12,21 @@ class MyLoginForm(forms.Form):
 
 
 class MySignUpForm(UserCreationForm):
+    type = forms.ChoiceField(choices=User.CHARACTER_TYPES, required=True)
+    skills = forms.CharField(max_length=100, required=True)
+
+    password1 = forms.CharField(label="Password", strip=False, widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}), help_text="")
+    password2 = forms.CharField(label="Confirm Password", strip=False, widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}), help_text="")
+
     class Meta:
         model = User
-        fields = ["username", "email", "password1", "password2"]
+        fields = ["username", "email", "type", "skills", "password1", "password2"]
+
+    def clean_skills(self):
+        skills = self.cleaned_data.get("skills")
+        if not skills or skills.strip() == "":
+            raise forms.ValidationError("You must enter at least one skill")
+        return skills
 
 
 class TeamForm(forms.ModelForm):

@@ -18,7 +18,7 @@ class User(AbstractUser):
     username = models.CharField(max_length=20, unique=True)
     email = models.EmailField(unique=True)
     type = models.CharField(max_length=20, choices=CHARACTER_TYPES)
-    skills = models.CharField(max_length=100, blank=True)
+    skills = models.CharField(max_length=100)
     score = models.DecimalField(max_digits=2, 
                                 decimal_places=1, 
                                 validators=[MinValueValidator(1.0), MaxValueValidator(5.0)],
