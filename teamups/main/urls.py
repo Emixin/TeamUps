@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import TaskListView, TeamListView, HomePageView, MyLoginView, MyLogoutView
+from .views import TaskListView, TeamListView, HomePageView, MyLoginView, MyLogoutView, UserTypeView
 from .views import DashboardView, MySignUpView, UsersRatingList, TeamDetailsView, UserInvitationList, NotificationsView
 
 
@@ -15,4 +15,5 @@ urlpatterns = [
     path('teams/details/<int:pk>/', TeamDetailsView.as_view(), name='team_details'),
     path('user/invitations/<int:pk>/', UserInvitationList.as_view(), name='invitations'),
     path('user/notifications/<int:pk>/', NotificationsView.as_view(), name='notifications'),
+    path('user/type/', UserTypeView.as_view(), name='user_type'),
 ]

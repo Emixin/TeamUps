@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from .models import Team, Task
+from .learning_model.matchmaker import predict_user_type
 
 
 User = get_user_model()
@@ -12,15 +13,24 @@ class MyLoginForm(forms.Form):
 
 
 class MySignUpForm(UserCreationForm):
-    type = forms.ChoiceField(choices=User.CHARACTER_TYPES, required=True)
+    type = forms.ChoiceField(choices=[('AI-PRED', 'AI-Pred')] + User.CHARACTER_TYPES, required=True)
     skills = forms.CharField(max_length=100, required=True)
 
     password1 = forms.CharField(label="Password", strip=False, widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}), help_text="")
     password2 = forms.CharField(label="Confirm Password", strip=False, widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}), help_text="")
-
+    
     class Meta:
         model = User
-        fields = ["username", "email", "type", "skills", "password1", "password2"]
+        fields = ["username", "email", "skills", "password1", "password2", "type"]
+
+
+    def clean_type(self):
+        type_value = self.cleaned_data["type"]
+        if type_value == "AI-PRED":
+            skills = self.cleaned_data["skills"]
+            type_value = predict_user_type(skills).upper()
+        return type_value
+
 
     def clean_skills(self):
         skills = self.cleaned_data.get("skills")

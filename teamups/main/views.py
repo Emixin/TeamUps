@@ -1,4 +1,4 @@
-from django.views.generic import ListView, FormView, DetailView, CreateView
+from django.views.generic import ListView, FormView, DetailView, CreateView, TemplateView
 from django.contrib.auth import authenticate, get_user_model, login
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -59,8 +59,19 @@ class MyLoginView(FormView):
 class MySignUpView(CreateView):
     form_class = MySignUpForm
     template_name = 'main/signup.html'
-    success_url = reverse_lazy("login")
 
+    def get_success_url(self):
+        return f"{reverse_lazy('user_type')}?type={self.object.type}"
+    
+
+
+class UserTypeView(TemplateView):
+    template_name = 'main/user_type.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['predicted_user_type'] = self.request.GET.get("type")
+        return context
 
 
 class MyLogoutView(LogoutView):
