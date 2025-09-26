@@ -1,3 +1,6 @@
+/*  I WILL SEPERATE EACH STYLE  */
+
+
 /*  MAIN STYLES  */
 
 * {
@@ -138,7 +141,6 @@ button.reject:hover {
 
 /* DASHBOARD STYLES */
 
-
 .welcome-average-score {
     display: flex;
     align-items: center;
@@ -247,7 +249,6 @@ button.reject:hover {
 
 /* HOMEPAGE STYLES */
 
-
 .home-container {
     max-width: 800px;
     margin: 0 auto;
@@ -342,7 +343,6 @@ button.reject:hover {
 
 /* NOTIFICATIONS STYLES */
 
-
 .notifications-container {
     display: block;
     max-width: 600px;
@@ -395,4 +395,3 @@ button.reject:hover {
 .team-details:hover {
     background-color: chocolate;
 }
-

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>User Type</title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'main/styles.css' %}">
+        <link rel="stylesheet" href="{% static 'main/user_type_styles.css' %}">
+    </head>
+
+    <body>
+        <h3>We've predicted your type as: {{ predicted_user_type }}</h3>
+
+        <div class="button-container">
+            <a href="{% url 'login' %}"><button>Login</button></a>
+            <a href="{% url 'home' %}"><button>Home</button></a>
+        </div>
+    </body>
+
+</html>

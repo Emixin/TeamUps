@@ -1,0 +1,34 @@
+/* USER TYPE STYLES */
+
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+
+.button-container a {
+    text-decoration: none;
+}
+
+
+.button-container button {
+    padding: 10px 25px;
+    font-size: 1rem;
+    color: #fff;
+    background-color: #2563eb;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s ease;
+}
+
+
+.button-container button:hover {
+    background-color: #1e40af;
+    transform: translateY(-2px);
+}
+
