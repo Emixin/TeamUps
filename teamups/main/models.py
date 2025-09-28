@@ -1,11 +1,20 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from datetime import timedelta
 
 
 
+
+class UserManager(BaseUserManager):
+    def available(self):
+        return self.filter(is_available=True)
+
+
+
 class User(AbstractUser):
+
+    objects = UserManager()
 
     CHARACTER_TYPES = [
         ('LEADER', 'Leader'),
@@ -51,15 +60,27 @@ class Task(models.Model):
         ('TESTING', 'Testing'),
     ]
 
+    STATUS_CHOICES = [
+        ('COMPLETED', 'Completed'),
+        ('PENDING', 'Pending'),
+    ]
+
     title = models.CharField(max_length=20)
     description = models.TextField()
     deadline = models.DateTimeField()
     team = models.ForeignKey('Team', on_delete=models.CASCADE, blank=True, null=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     task_type = models.CharField(max_length=20, choices=TASK_TYPES)
-    status = models.CharField(max_length=20, choices=[('completed','Completed'), ('pending','PENDING')], default='PENDING')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # i will use it in views later!
+    def change_status(self):
+        if self.status == "PENDING":
+            self.status = "COMPLETED"
+        return f"new status is {self.status}"
+    
 
     def renew_deadline(self, extra_time):
         extra_time = int(extra_time)
@@ -125,6 +146,9 @@ class Invitation(models.Model):
     invited_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_invitations')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('team', 'invited_user')
 
     def accept(self):
         if self.status == 'PENDING' and self.team.members.count() < self.team.max_members:

@@ -9,6 +9,7 @@ from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm
 from django.shortcuts import redirect
 
 
+# checked 'PENDING' status
 
 
 User = get_user_model()
