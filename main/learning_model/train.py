@@ -13,7 +13,6 @@ cursor.execute("SELECT id, skills, score, score_count, type FROM main_user")
 rows = cursor.fetchall()
 
 
-# Data Preprocessing
 skills = [row[1].lower() for row in rows]
 characters = [row[4].lower() for row in rows]
 
