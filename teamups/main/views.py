@@ -9,7 +9,6 @@ from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm
 from django.shortcuts import redirect
 
 
-# checked 'PENDING' status
 
 
 User = get_user_model()
@@ -249,10 +248,6 @@ class TeamDetailsView(LoginRequiredMixin, DetailView):
             invitation = Invitation.objects.create(team=team_obj, invited_user=selected_user_obj, 
                                                    invited_by=team_leader)
             invitation.save()
-
-            notification = Notification.objects.create(user=selected_user_obj, message=f"{team_leader} has invited you to {team_obj}")
-            notification.save()
-
             return redirect('team_details', pk=team_id)
 
         elif action == "remove" and user == team_leader:
