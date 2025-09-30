@@ -45,6 +45,13 @@ class User(AbstractUser):
         self.save()
         return self.score
     
+    # i will use this later!
+    def change_availability(self):
+        if self.is_available == True:
+            self.is_available = False
+        else:
+            self.is_available = True
+    
     
     def __str__(self):
         return self.username
@@ -75,7 +82,7 @@ class Task(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    # i will use it in views later!
+    # i will use it in views later! 
     def change_status(self):
         if self.status == "PENDING":
             self.status = "COMPLETED"
@@ -94,7 +101,7 @@ class Task(models.Model):
 
 
 class Team(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=20, unique=True)
     members = models.ManyToManyField(User, related_name="teams")
     max_members = models.PositiveIntegerField(default=5)
     leader = models.ForeignKey(User, on_delete=models.CASCADE, related_name="led_teams")
