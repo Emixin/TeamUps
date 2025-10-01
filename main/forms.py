@@ -45,8 +45,19 @@ class TeamForm(forms.ModelForm):
         fields = ['name', 'max_members', 'leader']
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         self.fields["leader"].queryset = User.objects.filter(is_superuser=False)
+
+    def save(self, commit=True):
+        team = super().save(commit=False)
+        if commit:
+            team.save()
+            team.members.add(self.user)
+            leader = self.cleaned_data['leader']
+            if leader not in team.members.all():
+                team.members.add(leader)
+        return team
 
 
 class TaskForm(forms.ModelForm):
