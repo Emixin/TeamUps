@@ -79,6 +79,28 @@ class MyLogoutView(LogoutView):
 
 
 
+
+def handle_form(request, form, success_message, extra_kwargs=None, redirect_url='dashboard'):
+    """
+    This function handles a form submission and redirects back with a success message.
+    extra_kwargs is a dictionary of additional fields to set before saving
+    """
+    
+    if form.is_valid():
+        obj = form.save()
+
+        if extra_kwargs:
+            for key, value in extra_kwargs.items():
+                setattr(obj, key, value)
+
+        obj.save()
+        messages.success(request, success_message)
+        return redirect(redirect_url)
+    return form
+
+
+
+
 class DashboardView(LoginRequiredMixin, DetailView):
     model = User
     template_name = 'main/dashboard.html'
@@ -99,39 +121,29 @@ class DashboardView(LoginRequiredMixin, DetailView):
 
         if "create_task" in request.POST:
             task_form = TaskForm(request.POST, user_led_teams=Team.objects.filter(leader=user))
-
-            if task_form.is_valid():
-                task = task_form.save(commit=False)
-                task.created_by = user
-                task.save()
-                messages.success(request, "New task created!")
-                return redirect('dashboard')
+            result = handle_form(request,
+                                 form=task_form,
+                                 success_message="New task created!", extra_kwargs={"created_by": user})
             
-        else:
-            task_form = TaskForm(user_led_teams=Team.objects.filter(leader=user))
-
+            if isinstance(result, TaskForm):
+                context = self.get_context_data()
+                context["task_form"] = result
+                return self.render_to_response(context)
+            
+            return result
         
         if "create_team" in request.POST:
-            team_form = TeamForm(request.POST)
+            team_form = TeamForm(request.POST, user=request.user)
+            result = handle_form(request,
+                                 form=team_form,
+                                 success_message="New Team Created!")
             
-            if team_form.is_valid():
-                team = team_form.save()
-                team.members.add(user)
-                if team.leader not in team.members.all():
-                    team.members.add(team.leader)
-                
-                messages.success(request, "New team created!")
-                return redirect('dashboard')
+            if isinstance(result, TeamForm):
+                context = self.get_context_data()
+                context["team_form"] = result
+                return self.render_to_response(context)
             
-            else:
-                team_form = TeamForm()
-       
-            context = self.get_context_data()
-            context["task_form"] = task_form
-            context["team_form"] = team_form
-            return self.render_to_response(context)
-
-
+            return result
 
 class UserInvitationList(LoginRequiredMixin, ListView):
     model = Invitation
