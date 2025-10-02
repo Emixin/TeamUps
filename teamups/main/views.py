@@ -145,6 +145,30 @@ class DashboardView(LoginRequiredMixin, DetailView):
             
             return result
 
+
+
+
+def handle_invitation(request, invitation, result):
+    """
+    This method handles user's invitation process.
+    result can be either "accept" or "reject".
+    """
+    if invitation.status != "PENDING":
+        messages.error(request, "Invitation is already answered!")
+        return None
+
+    if result == "accept":
+            invitation.accept()
+            messages.success(request, "Accepted!")
+
+    if result == "reject":
+            invitation.decline()
+            messages.success(request, "Rejected!")
+
+    return invitation
+
+
+
 class UserInvitationList(LoginRequiredMixin, ListView):
     model = Invitation
     template_name = 'main/user_invitations.html'
@@ -169,19 +193,10 @@ class UserInvitationList(LoginRequiredMixin, ListView):
 
         invitation = Invitation.objects.filter(team=invitation_team, invited_user=invited_user, invited_by=invited_by).first()
 
-        if result == "accept":
-            if invitation.status == "PENDING":
-                invitation.accept()
-                messages.success(request, "Accepted!")
-            messages.error(request, "Invitation is already answered!")
-
-        if result == "reject":
-            if invitation.status == "PENDING":
-                invitation.decline()
-                messages.success(request, "Rejected!")
-            messages.error(request, "Invitation is already answered!")
+        invitation = handle_invitation(request, invitation, result)
         
-        invitation.save()
+        if invitation:
+            invitation.save()
 
         user_id = kwargs.get("pk")
         return redirect('invitations', pk=user_id)
