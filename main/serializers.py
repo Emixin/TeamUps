@@ -6,7 +6,7 @@ from .models import Team, Invitation, User, Task, Notification
 class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
-        fields = ["name", "leader", "max_members"]
+        fields = "__all__"
 
 
 class InvitationSerializer(serializers.ModelSerializer):

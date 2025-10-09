@@ -2,11 +2,11 @@ from django.urls import path, include
 from .views import TaskListView, TeamListView, HomePageView, MyLoginView, MyLogoutView, UserTypeView
 from .views import DashboardView, MySignUpView, UsersRatingList, TeamDetailsView, UserInvitationList, NotificationsView
 from rest_framework.routers import DefaultRouter
-from .api import TeamViewSet, InvitationViewSet, UserViewSet, TaskViewSet, NotificationViewSet
+from .api import TeamListAPIView, InvitationViewSet, UserViewSet, TaskViewSet, NotificationViewSet
+
 
 
 router = DefaultRouter()
-router.register(r'teams', TeamViewSet)
 router.register(r'invitations', InvitationViewSet)
 router.register(r'users', UserViewSet)
 router.register(r'tasks', TaskViewSet, basename='task')
@@ -29,4 +29,5 @@ urlpatterns = [
     path('user/type/', UserTypeView.as_view(), name='user_type'),
 
     path('api/', include(router.urls)),
+    path('api/teams/', TeamListAPIView.as_view()),
 ]

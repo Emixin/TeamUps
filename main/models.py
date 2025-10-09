@@ -41,16 +41,17 @@ class User(AbstractUser):
 
     def calculate_new_score(self, new_score):
         self.score_count += 1
-        self.score = (self.score * (self.score_count - 1) + new_score) / (self.score_count)
+        if self.score:
+            self.score = (self.score * (self.score_count - 1) + new_score) / (self.score_count)
+        else:
+            self.score = new_score
         self.save()
         return self.score
     
     # i will use this later!
     def change_availability(self):
-        if self.is_available == True:
-            self.is_available = False
-        else:
-            self.is_available = True
+        self.is_available = not self.is_available
+        self.save()
     
     
     def __str__(self):
@@ -123,15 +124,13 @@ class Team(models.Model):
         return self.teamwork_score
 
     def add_member(self, user):
-        usersname_list = [member.username for member in self.members.all()]
-        if user.username not in usersname_list and self.members.count() < self.max_members:
+        if not self.members.filter(id=user.id).exists() and self.members.count() < self.max_members:
             self.members.add(user)
             self.save()
             return f"new user{user.username} added to team {self.name}"
 
     def remove_member(self, user):
-        usersname_list = [member.username for member in self.members.all()]
-        if user.username in usersname_list:
+        if not self.members.filter(id=user.id).exists():
             self.members.remove(user)
             self.save()
             return f"the user {user.username} has been deleted!"
