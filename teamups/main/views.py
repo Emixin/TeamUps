@@ -191,12 +191,9 @@ class UserInvitationList(LoginRequiredMixin, ListView):
         invited_by = request.POST.get("invited_by")
         invited_by = User.objects.filter(username=invited_by).first()
 
-        invitation = Invitation.objects.filter(team=invitation_team, invited_user=invited_user, invited_by=invited_by).first()
-
-        invitation = handle_invitation(request, invitation, result)
-        
-        if invitation:
-            invitation.save()
+        if invited_by and invited_user and invitation_team:
+            invitation = Invitation.objects.filter(team=invitation_team, invited_user=invited_user, invited_by=invited_by).first()
+            invitation = handle_invitation(request, invitation, result)
 
         user_id = kwargs.get("pk")
         return redirect('invitations', pk=user_id)
@@ -220,10 +217,13 @@ class TaskListView(LoginRequiredMixin, ListView):
         task_title = request.POST.get("task_title")
 
         user = self.request.user
-        task = Task.objects.filter(title=task_title)
-        task_obj = list(task)[0]
-        user_created = task_obj.created_by
+        task_obj = Task.objects.filter(title=task_title).first()
 
+        if not task_obj:
+            messages.error(request, "Task not found!")
+            return redirect('tasks')
+            
+        user_created = task_obj.created_by
         if user == user_created:
             task_obj.deadline = task_obj.renew_deadline(extra_time)
             messages.success(request, "Deadline is successfully changed")
@@ -244,9 +244,13 @@ class TeamListView(LoginRequiredMixin, ListView):
     
     def post(self, request):
         team_name = request.POST.get("rated_team")
-        team = Team.objects.filter(name=team_name)
-        team_obj = list(team)[0]
+        team_obj = Team.objects.filter(name=team_name).first()
         new_score = request.POST.get("score")
+
+        if not team_obj:
+            messages.error(request, "Team not found!")
+            return redirect('teams')
+        
         team_obj.recalculate_teamwork_score(new_score)
         return redirect('teams')
 
@@ -261,27 +265,31 @@ class TeamDetailsView(LoginRequiredMixin, DetailView):
     def post(self, request, **kwargs):
         user = request.user
         team_title = request.POST.get("title")
-        team = Team.objects.filter(name=team_title)
-        team_obj = list(team)[0]
+        team_obj = Team.objects.filter(name=team_title).first()
+
+        if not team_obj:
+            messages.error(request, "Team not found!")
+            return redirect('team_details', pk=team_id)
+
         team_leader = team_obj.leader
 
         selected_user = request.POST.get("member")
-        selected_user_qsobj = User.objects.filter(username=selected_user)
-        selected_user_obj = list(selected_user_qsobj)[0]
+        selected_user_obj = User.objects.filter(username=selected_user).first()
         action = request.POST.get("action")
 
         team_id = kwargs.get("pk")
-        if action == "add" and user == team_leader:
+        if action == "add" and user == team_leader and selected_user_obj:
             invitation = Invitation.objects.create(team=team_obj, invited_user=selected_user_obj, 
                                                    invited_by=team_leader)
             invitation.save()
             return redirect('team_details', pk=team_id)
 
-        elif action == "remove" and user == team_leader:
+        elif action == "remove" and user == team_leader and selected_user_obj:
             team_obj.remove_member(selected_user_obj)
             team_obj.save()
             return redirect('team_details', pk=team_id)
         
+        messages.error("User not found!")
         return redirect('team_details', pk=team_id)
 
 
@@ -303,10 +311,19 @@ class UsersRatingList(LoginRequiredMixin, ListView):
         rated_user = request.POST.get("rated_user")
 
         rated_user = User.objects.filter(username=rated_user).first()
+        
+        if not rated_user:
+            messages.error(request, "User not found!")
+            return redirect('ratings')
+        
         rated_user_teams = Team.objects.filter(members=rated_user)
 
         user = request.user
         user_teams = Team.objects.filter(members=user)
+
+        if not user_teams or not rated_user_teams:
+            messages.error(request, "Both users must be a team member!")
+            return redirect('ratings')
 
         if new_score and rated_user and rated_user_teams.intersection(user_teams).exists():
             rated_user.score = rated_user.calculate_new_score(int(new_score))
