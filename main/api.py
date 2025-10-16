@@ -11,7 +11,8 @@ from .models import Team, Invitation, User, Task, Notification
 
 from .serializers import (
     TeamSerializer, InvitationSerializer, UserSerializer,
-    TaskSerializer, NotificationSerializer, ExtendDeadlineSerializer
+    TaskSerializer, NotificationSerializer, ExtendDeadlineSerializer,
+    SendTeamInvitationSerializer
 )
 
 
@@ -52,7 +53,17 @@ class TeamViewSet(viewsets.ModelViewSet):
         if check_result:
             return check_result
         return super().destroy(request, *args, **kwargs)
-
+    
+    @action(detail=True, methods=["get", "post"])
+    def send_invitation(self, request, pk=None):
+        team = self.get_object()
+        serializer = SendTeamInvitationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        invited_user_id = serializer.validated_data["invited_user_id"]
+        invited_user = User.objects.filter(id=invited_user_id).first()
+        invitation = Invitation.objects.create(team=team, invited_user=invited_user, invited_by=request.user)
+        invitation.save()
+        return Response({"message": "Invitation is sent!"})
 
 
 
