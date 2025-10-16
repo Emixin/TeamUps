@@ -8,6 +8,9 @@ class TeamSerializer(serializers.ModelSerializer):
         model = Team
         fields = "__all__"
 
+class SendTeamInvitationSerializer(serializers.Serializer):
+    invited_user_id = serializers.IntegerField(min_value=1)
+
 
 class InvitationSerializer(serializers.ModelSerializer):
     class Meta:
