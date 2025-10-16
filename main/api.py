@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.db.models import Q
@@ -10,7 +11,7 @@ from .models import Team, Invitation, User, Task, Notification
 
 from .serializers import (
     TeamSerializer, InvitationSerializer, UserSerializer,
-    TaskSerializer, NotificationSerializer
+    TaskSerializer, NotificationSerializer, ExtendDeadlineSerializer
 )
 
 
@@ -22,12 +23,13 @@ class TeamViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Team.objects.filter(members=self.request.user)
     
-    def perform_create(self, serializer):
+    def perform_create(self, serializer: TeamSerializer) -> None:
         serializer.save(leader=self.request.user)
 
-    def _leadership_checker(self, team):
+    def _leadership_checker(self, team: Team) -> Response | None:
         if team.leader != self.request.user:
-            return Response({"detail": "Only the team leader can perform this action!"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"detail": "Only the team leader can perform this action!"},
+                            status=status.HTTP_403_FORBIDDEN)
         return None
     
     def update(self, request, *args, **kwargs):
@@ -86,15 +88,25 @@ class InvitationViewSet(viewsets.ModelViewSet):
         invitation = self.get_queryset().filter(id=pk).first()
         
         if request.user != invitation.invited_user:
-            return Response({"error": "You can only accept your own invitations."}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"error": "You can only accept your own invitations."},
+                            status=status.HTTP_403_FORBIDDEN)
         
         result = invitation.accept()
         invitation.save()
         return Response({"message": result}, status=status.HTTP_200_OK)
 
 
+    @action(detail=True, methods=["get", "post"])
     def decline(self, request, pk=None):
-        pass
+        invitation = self.get_queryset().filter(id=pk).first()
+
+        if request.user != invitation.invited_user:
+            return Response({"error": "You can only decline your own invitations."},
+                            status=status.HTTP_403_FORBIDDEN)
+        
+        result = invitation.decline()
+        invitation.save()
+        return Response({"message": result}, status=status.HTTP_200_OK)
 
 
 
@@ -104,6 +116,23 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
 
+    def perform_update(self, serializer):
+        user = self.get_object()
+        if self.request.user == user:
+            raise ValidationError({"message": "You can't rate yourself!"})
+        
+        rater_teams = Team.objects.filter(members=self.request.user)
+        rated_teams = Team.objects.filter(members=user)
+        if not rated_teams.intersection(rater_teams).exists():
+            raise ValidationError({"message": "You can only rate your teammates!"})
+
+        rate = serializer.validated_data["score"]
+        user.calculate_new_score(rate)
+        user.save()
+        return super().perform_update(serializer)
+
+
+
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
@@ -111,6 +140,33 @@ class TaskViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Task.objects.filter(created_by=self.request.user)
 
+
+    @action(detail=True ,methods=["get", "post"])
+    def mark_as_completed(self, request, pk=None):
+        task = self.get_object()
+        if task.team.leader != self.request.user:
+            return  Response({"message": "Only team leaders can do this!"},
+                             status=status.HTTP_403_FORBIDDEN)
+        task.change_status()
+        task.save()
+        return Response({"message": "Task marked as completed!"},
+                        status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=["get", "post"])
+    def extend_deadline(self, request, pk=None):
+        task = self.get_object()
+        if task.team.leader != self.request.user:
+            return Response({"message": "Only team leaders can do this!"})
+        if task.status == "COMPLETED":
+            return Response({"message": "Task is already completed!"})
+        serializer = ExtendDeadlineSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        extra_days = serializer.validated_data["extra_days"]
+        result = task.renew_deadline(extra_days)
+        return Response({"message": {result}},
+                        status=status.HTTP_200_OK)
+
+        
 
 
 class NotificationViewSet(viewsets.ModelViewSet):

@@ -18,13 +18,17 @@ class InvitationSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["username", "email", "skills", "type"]
+        fields = ["username", "email", "skills", "type", "score"]
 
 
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ["title", "description", "deadline", 'team', "created_by", "status"]
+
+
+class ExtendDeadlineSerializer(serializers.Serializer):
+    extra_days = serializers.IntegerField(min_value=1)
         
 
 class NotificationSerializer(serializers.ModelSerializer):
