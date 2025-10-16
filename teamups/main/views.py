@@ -87,7 +87,7 @@ def handle_form(request, form, success_message, extra_kwargs=None, redirect_url=
     """
     
     if form.is_valid():
-        obj = form.save()
+        obj = form.save(commit=False)
 
         if extra_kwargs:
             for key, value in extra_kwargs.items():
@@ -118,6 +118,7 @@ class DashboardView(LoginRequiredMixin, DetailView):
     
     def post(self, request):
         user = self.request.user
+        self.object = self.get_object()
 
         if "create_task" in request.POST:
             task_form = TaskForm(request.POST, user_led_teams=Team.objects.filter(leader=user))
@@ -168,7 +169,7 @@ def handle_invitation(request, invitation, result):
     return invitation
 
 
-
+# Check this later!
 class UserInvitationList(LoginRequiredMixin, ListView):
     model = Invitation
     template_name = 'main/user_invitations.html'

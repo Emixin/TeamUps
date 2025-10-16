@@ -1,6 +1,14 @@
 from django.urls import path, include
-from .views import TaskListView, TeamListView, HomePageView, MyLoginView, MyLogoutView, UserTypeView
-from .views import DashboardView, MySignUpView, UsersRatingList, TeamDetailsView, UserInvitationList, NotificationsView
+
+from .views import (TaskListView, TeamListView, HomePageView, MyLoginView,
+                    MyLogoutView, UserTypeView
+)
+
+from .views import (DashboardView, MySignUpView,
+                    UsersRatingList, TeamDetailsView,
+                    UserInvitationList, NotificationsView
+)
+
 from rest_framework.routers import DefaultRouter
 
 from .api import (
