@@ -141,6 +141,13 @@ class UserViewSet(viewsets.ModelViewSet):
         user.calculate_new_score(rate)
         user.save()
         return super().perform_update(serializer)
+    
+
+    @action(detail=True, methods=["get", "post"])
+    def toggle_availability(self, request, pk=None):
+        user = self.get_object()
+        user.change_availability()
+        return Response({"message": f"Availability changed to {user.is_available}"})
 
 
 
@@ -193,6 +200,14 @@ class NotificationViewSet(viewsets.ModelViewSet):
             notification.mark_as_read()
             notification.save()
         return super().perform_update(serializer)
+    
+    @action(detail=False, methods=["get", "post"])
+    def mark_all_as_read(self, request):
+        notifications = Notification.objects.filter(user=request.user)
+        for notification in notifications:
+            notification.mark_as_read()
+            notification.save()
+        return Response({"message": "All notifications are marked as read!"})
     
 
 
