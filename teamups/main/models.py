@@ -48,7 +48,7 @@ class User(AbstractUser):
         self.save()
         return self.score
     
-    # i will use this later!
+    
     def change_availability(self):
         self.is_available = not self.is_available
         self.save()

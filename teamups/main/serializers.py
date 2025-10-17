@@ -21,7 +21,7 @@ class InvitationSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["username", "email", "skills", "type", "score"]
+        fields = ["username", "email", "skills", "type", "score", "is_available"]
 
 
 class TaskSerializer(serializers.ModelSerializer):
