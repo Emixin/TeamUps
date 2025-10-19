@@ -1,4 +1,8 @@
-from django.views.generic import ListView, FormView, DetailView, CreateView, TemplateView
+from django.views.generic import (
+    ListView, FormView, DetailView,
+    CreateView, TemplateView
+)
+
 from django.contrib.auth import authenticate, get_user_model, login
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -304,7 +308,7 @@ class UsersRatingList(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         users = User.objects.filter(is_superuser=False)
         users = users.exclude(username=self.request.user)
-        context['users'] = users
+        context['users'] = users.recently_added().available()
         return context
     
     def post(self, request):

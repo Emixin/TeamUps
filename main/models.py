@@ -1,14 +1,12 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser
 from datetime import timedelta
 
-
-
-
-class UserManager(BaseUserManager):
-    def available(self):
-        return self.filter(is_available=True)
+from .managers import (
+    UserManager, TaskManager, TeamManager,
+    InvitationManager, NotificationManager
+)
 
 
 
@@ -59,7 +57,11 @@ class User(AbstractUser):
     
 
 
+
 class Task(models.Model):
+
+    objects = TaskManager()
+
     TASK_TYPES = [
         ('PLANNING', 'Planning'),
         ('CREATIVE', 'Creative'),
@@ -101,7 +103,11 @@ class Task(models.Model):
 
 
 
+
 class Team(models.Model):
+
+    objects = TeamManager()
+
     name = models.CharField(max_length=20, unique=True)
     members = models.ManyToManyField(User, related_name="teams")
     max_members = models.PositiveIntegerField(default=5)
@@ -139,8 +145,11 @@ class Team(models.Model):
         return self.name
     
 
-
+    
 class Invitation(models.Model):
+
+    objects = InvitationManager()
+
     STATUS_CHOICES = [
         ('PENDING', 'Pending'),
         ('ACCEPTED', 'Accepted'),
@@ -179,7 +188,11 @@ class Invitation(models.Model):
 
 
 
+
 class Notification(models.Model):
+
+    objects = NotificationManager()
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
     message = models.CharField(max_length=25)
     is_read = models.BooleanField(default=False)
