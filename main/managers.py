@@ -5,97 +5,42 @@ from django.db import models
 
 
 
+class RecentlyAddedMixin:
+    def recently_added(self, days=7):
+        cutoff = timezone.now() - timedelta(days=days)
+        return self.filter(created_at__gte=cutoff)
 
-class UserQuerySet(models.QuerySet):
+
+
+
+
+class UserQuerySet(models.QuerySet, RecentlyAddedMixin):
     def available(self):
         return self.filter(is_available=True)
-    
-    def is_leader(self):
-        return self.filter(type="LEADER")
-
-    def recently_added(self, days=7):
-        cutoff = timezone.now() - timedelta(days=days)
-        return self.filter(created_at__gte=cutoff)
 
 
-
-class UserManager(BaseUserManager):
-    def get_queryset(self):
-        return UserQuerySet(self.model, using=self._db)
-    
-    def available(self):
-        return self.get_queryset().available()
-    
-    def is_leader(self):
-        return self.get_queryset().is_leader()
-    
-    def recently_added(self):
-        return self.get_queryset().recently_added()
-    
-
-
-class TaskQuerySet(models.QuerySet):
-    def recently_added(self, days=7):
-        cutoff = timezone.now() - timedelta(days=days)
-        return self.filter(created_at__gte=cutoff)
-
-
-
-class TaskManager(models.Manager):
-    def get_queryset(self):
-        return TaskQuerySet(self.model, using=self._db)
-    
-    def recently_added(self):
-        return self.get_queryset().recently_added()
+class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
+    pass
     
 
 
 
 
-class TeamQuerySet(models.QuerySet):
-    def recently_added(self, days=7):
-        cutoff = timezone.now() - timedelta(days=days)
-        return self.filter(created_at__gte=cutoff)
+class TaskQuerySet(models.QuerySet, RecentlyAddedMixin):
+    pass
 
 
-
-class TeamManager(models.Manager):
-    def get_queryset(self):
-        return TeamQuerySet(self.model, using=self._db)
-    
-    def recently_added(self):
-        return self.get_queryset().recently_added()
+class TaskManager(models.Manager.from_queryset(TaskQuerySet)):
+    pass
     
 
 
 
-class InvitationQuerySet(models.QuerySet):
-    def recently_added(self, days=7):
-        cutoff = timezone.now() - timedelta(days=days)
-        return self.filter(created_at_gte=cutoff)
+
+class TeamQuerySet(models.QuerySet, RecentlyAddedMixin):
+    pass
 
 
+class TeamManager(models.Manager.from_queryset(TeamQuerySet)):
+    pass
 
-class InvitationManager(models.Manager):
-    def get_queryset(self):
-        return InvitationQuerySet(self.model, using=self._db)
-    
-    def recently_added(self):
-        return self.get_queryset().recently_added()
-    
-
-
-class NotificationQuerySet(models.QuerySet):
-    def recently_added(self, days=7):
-        cutoff = timezone.now() - timedelta(days=days)
-        return self.filter(created_at__gte=cutoff)
-
-
-
-class NotificationManager(models.Manager):
-    def get_queryset(self):
-        return NotificationQuerySet(self.model, using=self._db)
-    
-    def recently_added(self):
-        return self.get_queryset().recently_added()
-    
