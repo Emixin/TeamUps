@@ -173,7 +173,7 @@ def handle_invitation(request, invitation, result):
     return invitation
 
 
-# Check this later!
+
 class UserInvitationList(LoginRequiredMixin, ListView):
     model = Invitation
     template_name = 'main/user_invitations.html'

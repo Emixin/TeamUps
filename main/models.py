@@ -5,7 +5,6 @@ from datetime import timedelta
 
 from .managers import (
     UserManager, TaskManager, TeamManager,
-    InvitationManager, NotificationManager
 )
 
 
@@ -148,8 +147,6 @@ class Team(models.Model):
     
 class Invitation(models.Model):
 
-    objects = InvitationManager()
-
     STATUS_CHOICES = [
         ('PENDING', 'Pending'),
         ('ACCEPTED', 'Accepted'),
@@ -190,8 +187,6 @@ class Invitation(models.Model):
 
 
 class Notification(models.Model):
-
-    objects = NotificationManager()
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
     message = models.CharField(max_length=25)
