@@ -17,6 +17,10 @@ class InvitationSerializer(serializers.ModelSerializer):
         model = Invitation
         fields = "__all__"
 
+    
+class RemoveMemberSerializer(serializers.Serializer):
+    username_to_remove = serializers.CharField()
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

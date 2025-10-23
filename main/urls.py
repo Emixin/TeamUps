@@ -22,7 +22,7 @@ router.register(r'invitations', InvitationViewSet)
 router.register(r'users', UserViewSet)
 router.register(r'tasks', TaskViewSet, basename='task')
 router.register(r'notifications', NotificationViewSet, basename='notification')
-router.register(r'teamviewset', TeamViewSet, basename='team')
+router.register(r'teams', TeamViewSet, basename='team')
 
 
 

@@ -12,7 +12,7 @@ from .models import Team, Invitation, User, Task, Notification
 from .serializers import (
     TeamSerializer, InvitationSerializer, UserSerializer,
     TaskSerializer, NotificationSerializer, ExtendDeadlineSerializer,
-    SendTeamInvitationSerializer
+    SendTeamInvitationSerializer, RemoveMemberSerializer
 )
 
 
@@ -56,6 +56,16 @@ class TeamViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=["get", "post"])
     def send_invitation(self, request, pk=None):
+
+        if request.method == "GET":
+            serializer = SendTeamInvitationSerializer()
+            return Response(serializer.data)
+        
+        team = self.get_object()
+        check_result = self._leadership_checker(team)
+        if check_result:
+            return check_result
+
         team = self.get_object()
         serializer = SendTeamInvitationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -64,6 +74,30 @@ class TeamViewSet(viewsets.ModelViewSet):
         invitation = Invitation.objects.create(team=team, invited_user=invited_user, invited_by=request.user)
         invitation.save()
         return Response({"message": "Invitation is sent!"})
+    
+    @action(detail=True, methods=["get", "post"])
+    def remove_member(self, request, pk=None):
+
+        if request.method == "GET":
+            serializer = RemoveMemberSerializer()
+            return Response(request.data)
+        
+        team = self.get_object()
+        check_result = self._leadership_checker(team)
+        if check_result:
+            return check_result
+
+        team = self.get_object()
+        serializer = RemoveMemberSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data["username_to_remove"]
+        user = User.objects.filter(username=username).first()
+
+        if not user in team.members.all():
+            return Response({"message": "There is no such user in the team to remove!"})
+        
+        team.remove_member(user=user)
+        return Response({"message": "User has been removed!"})
 
 
 

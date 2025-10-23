@@ -133,12 +133,14 @@ class Team(models.Model):
             self.members.add(user)
             self.save()
             return f"new user{user.username} added to team {self.name}"
+        return f"user already exists or team is full!"
 
     def remove_member(self, user):
-        if not self.members.filter(id=user.id).exists():
+        if self.members.filter(id=user.id).exists():
             self.members.remove(user)
             self.save()
             return f"the user {user.username} has been deleted!"
+        return f"the user {user.username} is not a member of the team!"
         
     def __str__(self):
         return self.name
