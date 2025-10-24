@@ -10,7 +10,7 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from .models import Task, Team, User, Invitation, Notification
 from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm
-from django.shortcuts import redirect
+
 
 
 
@@ -178,6 +178,7 @@ class UserInvitationList(LoginRequiredMixin, ListView):
     model = Invitation
     template_name = 'main/user_invitations.html'
     context_object_name = 'invitations'
+    paginate_by = 10
 
     def get_queryset(self):
         user = self.request.user
@@ -210,6 +211,7 @@ class TaskListView(LoginRequiredMixin, ListView):
     model = Task
     template_name = 'main/tasks_list.html'
     context_object_name = 'tasks'
+    paginate_by = 7
 
     def get_queryset(self):
         user = self.request.user
@@ -242,6 +244,7 @@ class TeamListView(LoginRequiredMixin, ListView):
     model = Team
     template_name = 'main/teams_list.html'
     context_object_name = 'teams'
+    paginate_by = 7
 
     def get_queryset(self):
         user = self.request.user
@@ -302,14 +305,11 @@ class UsersRatingList(LoginRequiredMixin, ListView):
     model = User
     template_name = 'main/users_list.html'
     context_object_name = 'users'
+    paginate_by = 7
 
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        users = User.objects.filter(is_superuser=False)
-        users = users.exclude(username=self.request.user)
-        context['users'] = users.recently_added().available()
-        return context
+    def get_queryset(self):
+        return User.objects.filter(is_superuser=False).exclude(username=self.request.user).available()
     
     def post(self, request):
         new_score = request.POST.get("score")
@@ -343,9 +343,10 @@ class NotificationsView(LoginRequiredMixin, ListView):
     model = Notification
     template_name = "main/notifications.html"
     context_object_name = "notifications"
+    paginate_by = 10
 
     def get_queryset(self):
         user = self.request.user
-        notifications = Notification.objects.filter(user=user)
+        notifications = Notification.objects.filter(user=user).order_by('-created_at')
         return notifications
 
