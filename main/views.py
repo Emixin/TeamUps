@@ -8,6 +8,7 @@ from django.contrib.auth.views import LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages 
 from django.urls import reverse_lazy
+from django.shortcuts import redirect
 from .models import Task, Team, User, Invitation, Notification
 from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm
 

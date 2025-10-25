@@ -4,9 +4,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.filters import OrderingFilter
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Team, Invitation, User, Task, Notification
 
 from .serializers import (
@@ -15,6 +17,7 @@ from .serializers import (
     SendTeamInvitationSerializer, RemoveMemberSerializer
 )
 
+from .pagination import NotificationViewSetPagination
 
 
 class TeamViewSet(viewsets.ModelViewSet):
@@ -189,6 +192,11 @@ class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
 
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+
+    filterset_fields = ['status', 'task_type']
+    ordering_fields = ['deadline', 'created_at']
+
     def get_queryset(self):
         return Task.objects.filter(created_by=self.request.user)
 
@@ -224,6 +232,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 class NotificationViewSet(viewsets.ModelViewSet):
     serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = NotificationViewSetPagination
 
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user)

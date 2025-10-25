@@ -31,7 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ["title", "description", "deadline", 'team', "created_by", "status"]
+        fields = ["title", "description", "deadline", 'team', "created_by", "status", "task_type", "created_at"]
 
 
 class ExtendDeadlineSerializer(serializers.Serializer):
