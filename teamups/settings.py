@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     'rest_framework',
     'django_filters',
+    'channels',
 ]
 
 
@@ -73,6 +74,7 @@ AUTH_USER_MODEL = "main.User"
 
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -100,6 +102,23 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'teamups.wsgi.application'
+
+ASGI_APPLICATION = 'teamups.asgi.application'
+
+
+
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+
+
+
 
 
 # Database
@@ -148,6 +167,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
