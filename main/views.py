@@ -11,7 +11,7 @@ from django.urls import reverse_lazy
 from django.shortcuts import redirect
 from .models import Task, Team, User, Invitation, Notification
 from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm
-
+from .utils import handle_form, handle_invitation
 
 
 
@@ -84,28 +84,6 @@ class MyLogoutView(LogoutView):
 
 
 
-
-def handle_form(request, form, success_message, extra_kwargs=None, redirect_url='dashboard'):
-    """
-    This function handles a form submission and redirects back with a success message.
-    extra_kwargs is a dictionary of additional fields to set before saving
-    """
-    
-    if form.is_valid():
-        obj = form.save(commit=False)
-
-        if extra_kwargs:
-            for key, value in extra_kwargs.items():
-                setattr(obj, key, value)
-
-        obj.save()
-        messages.success(request, success_message)
-        return redirect(redirect_url)
-    return form
-
-
-
-
 class DashboardView(LoginRequiredMixin, DetailView):
     model = User
     template_name = 'main/dashboard.html'
@@ -151,27 +129,6 @@ class DashboardView(LoginRequiredMixin, DetailView):
             
             return result
 
-
-
-
-def handle_invitation(request, invitation, result):
-    """
-    This method handles user's invitation process.
-    result can be either "accept" or "reject".
-    """
-    if invitation.status != "PENDING":
-        messages.error(request, "Invitation is already answered!")
-        return None
-
-    if result == "accept":
-            invitation.accept()
-            messages.success(request, "Accepted!")
-
-    if result == "reject":
-            invitation.decline()
-            messages.success(request, "Rejected!")
-
-    return invitation
 
 
 
