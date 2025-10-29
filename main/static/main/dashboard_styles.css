@@ -90,17 +90,3 @@
     color: #1e3a8a;
 }
 
-
-.logout-form {
-    margin-top: 30px;
-}
-
-
-.logout-form button {
-    background-color: #dc2626;
-}
-
-
-.logout-form button:hover {
-    background-color: #b91c1c;
-}

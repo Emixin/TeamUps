@@ -8,7 +8,7 @@ from django.contrib.auth.views import LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages 
 from django.urls import reverse_lazy
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from .models import Task, Team, User, Invitation, Notification
 from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm
 from .utils import handle_form, handle_invitation
@@ -226,6 +226,16 @@ class TeamDetailsView(LoginRequiredMixin, DetailView):
     model = Team
     template_name = 'main/team_details.html'
     context_object_name = 'team'
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        query = self.request.GET.get('search_query')
+        if query:
+            context['users'] = User.objects.filter(username__icontains=query)
+        else:
+            context['users'] = User.objects.none()
+        return context
 
 
     def post(self, request, **kwargs):

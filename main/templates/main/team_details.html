@@ -4,39 +4,66 @@
     <title>Team Details</title>
         {% load static %}
         <link rel="stylesheet" href="{% static 'main/styles.css' %}">
+        <link rel="stylesheet" href="{% static 'main/team_details.css' %}">
 </head>
 <body>
 
     <h1>Team Details</h1>
 
-      <h3>{{ team.name }}</h3>
-      <p>Leader: {{ team.leader.username }}</p>
-      <p>Max Members: {{ team.max_members }}</p>
+      <div class="team-details-container">
+        <h3>{{ team.name }}</h3>
+        <p>Leader: {{ team.leader.username }}</p>
+        <p>Max Members: {{ team.max_members }}</p>
 
-      <h3>Members:</h3>
-      <ul>
-        {% for member in team.members.all %}
-          <li>{{ member.username }}</li>
-        {% empty %}
-          <li>No members yet.</li>
-        {% endfor %}
-      </ul>
+        <h3>Members:</h3>
+        <ul>
+          {% for member in team.members.all %}
+            <li>{{ member.username }}</li>
+          {% empty %}
+            <li>No members yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+      
+      <div class="forms-container">
+        <div class="form-box">
+          <h3>Add or Remove a member</h3>
+          <form method="post" style="display: inline">
+            {% csrf_token %}
+            <input type="hidden" name="title" value="{{ team.name }}">
+            <input type="text" name="member">enter username
+            <br>
+            <label for="action">select action</label>
+              <select name="action" id="action">
+                <option value="">-- choose an action --</option>
+                <option value="add">add</option>
+                <option value="remove">remove</option>
+              </select>
+            <br>
+            <button type="submit">submit</button>
+          </form>
+        </div>
 
-      <h3>Add or Remove a member</h3>
-      <form method="post" style="display: inline">
-        {% csrf_token %}
-        <input type="hidden" name="title" value="{{ team.name }}">
-        <input type="text" name="member">username
-        <br>
-        <label for="action">select action</label>
-          <select name="action" id="action">
-            <option value="">-- choose an action --</option>
-            <option value="add">add</option>
-            <option value="remove">remove</option>
-          </select>
-        <br>
-        <button type="submit">submit</button>
-      </form>
+        <div class="form-box">
+          <form method="get" action="{% url 'team_details' team.id %}">
+            <input type="text" name="search_query" placeholder="search users...">
+            <button type="submit">Search</button>
+          </form>
+
+          <div class="search-results">
+            {% if users %}
+              <ul>
+                {% for user in users %}
+                  <li>{{ user.username }}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p>No users found.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
       <br><br>
     <a href="{% url 'teams' %}" class="return-link">Return</a>
 </body>
