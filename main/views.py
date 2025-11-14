@@ -8,7 +8,8 @@ from django.contrib.auth.views import LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages 
 from django.urls import reverse_lazy
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
+from django.core.cache import caches
 from .models import Task, Team, User, Invitation, Notification
 from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm
 from .utils import handle_form, handle_invitation
@@ -17,6 +18,9 @@ from .utils import handle_form, handle_invitation
 
 
 User = get_user_model()
+
+cache = caches["default"]
+
 
 
 class HomePageView(DetailView):
@@ -28,9 +32,22 @@ class HomePageView(DetailView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['users_count'] = User.objects.filter(is_superuser=False).count()
-        context['teams_count'] = Team.objects.count()
-        context['tasks_count'] = Task.objects.count()
+
+
+        cache_key = "homepage_counts"
+        counts = cache.get(cache_key)
+
+        if not counts:
+            print("Cache MISS | recalculating counts")
+            counts = {
+                "users_count": User.objects.filter(is_superuser=False).count(),
+                "teams_count": Team.objects.count(),
+                "tasks_count": Task.objects.count(),
+            }
+
+            cache.set(cache_key, counts, timeout=60)
+
+        context.update(counts)
         return context
 
 
@@ -242,6 +259,7 @@ class TeamDetailsView(LoginRequiredMixin, DetailView):
         user = request.user
         team_title = request.POST.get("title")
         team_obj = Team.objects.filter(name=team_title).first()
+        team_id = kwargs.get("pk")
 
         if not team_obj:
             messages.error(request, "Team not found!")
@@ -253,7 +271,6 @@ class TeamDetailsView(LoginRequiredMixin, DetailView):
         selected_user_obj = User.objects.filter(username=selected_user).first()
         action = request.POST.get("action")
 
-        team_id = kwargs.get("pk")
         if action == "add" and user == team_leader and selected_user_obj:
             invitation = Invitation.objects.create(team=team_obj, invited_user=selected_user_obj, 
                                                    invited_by=team_leader)

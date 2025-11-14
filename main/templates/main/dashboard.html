@@ -30,13 +30,17 @@
             <a href="{% url 'notifications' user.pk %}">Notifications</a>
             <a href="{% url 'home' %}">Home</a>
         </div>
+        
+        {% load cache %}
 
         <div class="forms-row">
             <div class="form-card">
                 <p>Create a Team</p>
                 <form method="post">
                     {% csrf_token %}
-                    {{ team_form.as_p }}
+                    {% cache 60 team_form user.id %}
+                        {{ team_form.as_p }}
+                    {% endcache %}
                     <button type="submit" name="create_team">Create Team</button>
                 </form>
             </div>
@@ -45,7 +49,9 @@
                 <p>Create a Task</p>
                 <form method="post">
                     {% csrf_token %}
-                    {{ task_form.as_p }}
+                    {% cache 60 task_form user.id %}
+                        {{ task_form.as_p }}
+                    {% endcache %}
                     <button type="submit" name="create_task">Create Task</button>
                 </form>
             </div>
