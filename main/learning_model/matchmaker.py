@@ -1,7 +1,9 @@
 import joblib
+import os
 
 
-MODEL_PATH = r"C:\\Users\\Home\\Documents\\Projects\\TeamUps\\teamups\\main\\learning_model\\model.pkl"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "model.pkl")
 model, vectorizer, encoder = joblib.load(MODEL_PATH)
 
 
