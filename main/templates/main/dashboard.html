@@ -33,6 +33,20 @@
         
         {% load cache %}
 
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="avatar" accept="image/*">
+            <button type="submit", name="upload_avatar">Upload</button>
+        </form>
+
+        <div class="user-avatar">
+            {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" width="120" height="120">
+            {% else %}
+                <p>No avatar yet</p>
+            {% endif %}
+        </div>
+
         <div class="forms-row">
             <div class="form-card">
                 <p>Create a Team</p>

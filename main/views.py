@@ -145,6 +145,14 @@ class DashboardView(LoginRequiredMixin, DetailView):
                 return self.render_to_response(context)
             
             return result
+        
+        if "upload_avatar" in request.POST:
+            avatar = request.FILES["avatar"]
+            user = self.get_object()
+            user.avatar = avatar
+            user.save()
+
+            return redirect('dashboard')
 
 
 
