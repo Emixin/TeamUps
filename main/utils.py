@@ -58,3 +58,10 @@ def handle_form(request, form, success_message, extra_kwargs=None, redirect_url=
         return redirect(redirect_url)
     return form
 
+
+def avatar_upload_path_generator(instance, filename):
+     """
+     This function generates a file path for each file uploaded by a user,
+     to avoid filename conflicts.
+     """
+     return f"avatars/{instance.username}/{filename}"

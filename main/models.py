@@ -6,7 +6,7 @@ from datetime import timedelta
 from .managers import (
     UserManager, TaskManager, TeamManager,
 )
-
+from .utils import avatar_upload_path_generator
 
 
 class User(AbstractUser):
@@ -21,10 +21,11 @@ class User(AbstractUser):
         ('CONNECTOR', 'Connector'),
     ]
 
+    bio = models.TextField(max_length=255, null=True, blank=True)
     username = models.CharField(max_length=20, unique=True)
     email = models.EmailField(unique=True)
     type = models.CharField(max_length=20, choices=CHARACTER_TYPES)
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    avatar = models.ImageField(upload_to=avatar_upload_path_generator, null=True, blank=True)
     skills = models.CharField(max_length=100)
     score = models.DecimalField(max_digits=2, 
                                 decimal_places=1, 
