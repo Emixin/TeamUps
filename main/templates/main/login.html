@@ -22,6 +22,12 @@
             {{ form.as_p }}
             <button type="submit">login</button>
         </form>
+        <h2>Forgot your password?</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="email" name="user_email" placeholder="Your email" required>
+            <button type="submit">Send reset link</button>
+        </form>
         <a href="{% url 'home' %}">Home</a>
     </div>
 </body>

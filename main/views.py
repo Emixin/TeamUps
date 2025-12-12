@@ -7,11 +7,12 @@ from django.contrib.auth import authenticate, get_user_model, login
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages 
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.shortcuts import redirect
 from django.core.cache import caches
+from django.core.mail import send_mail
 from .models import Task, Team, User, Invitation, Notification
-from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm
+from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm, ResetPasswordForm
 from .utils import handle_form, handle_invitation
 
 
@@ -51,9 +52,47 @@ class HomePageView(DetailView):
         return context
 
 
+
+class ResetPasswordView(FormView):
+    template_name = "main/reset_password.html"
+    form_class = ResetPasswordForm
+
+    def post(self, request):
+        email = request.GET.get("email")
+        password = request.POST.get("new_password")
+        user = User.objects.filter(email=email).first()
+
+        form = ResetPasswordForm(request.POST)
+        if form.is_valid():
+            user.set_password(password)
+            user.save()
+            messages.success(request, "Password Changed!")
+            return redirect("reset_password")
+        
+        messages.error(request, "The Passwords did not match!")
+        return redirect("reset_password")
+
+
+
 class MyLoginView(FormView):
     template_name = "main/login.html"
     form_class = MyLoginForm
+
+    def post(self, request, *args, **kwargs):
+
+        if "user_email" in request.POST:
+            email = request.POST.get("user_email")
+            user = User.objects.filter(email=email).first()
+
+            if user:
+                reset_link = request.build_absolute_uri(reverse('reset_password') + f'?email={email}')
+                send_mail(subject='Reset password', message=f'Click the link below to reset your password:\n{reset_link}', from_email='teamupscenter@gmail.com', recipient_list=[email])
+                messages.success(request, "Password reset link has been sent!")
+            else:
+                messages.error(request, "The email is not found!")
+            return redirect('login')
+
+        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         username_or_email = form.cleaned_data["email_or_username"]

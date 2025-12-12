@@ -6,7 +6,8 @@ from .views import (TaskListView, TeamListView, HomePageView, MyLoginView,
 
 from .views import (DashboardView, MySignUpView,
                     UsersRatingList, TeamDetailsView,
-                    UserInvitationList, NotificationsView
+                    UserInvitationList, NotificationsView,
+                    ResetPasswordView
 )
 
 from rest_framework.routers import DefaultRouter
@@ -39,6 +40,7 @@ urlpatterns = [
     path('user/invitations/<int:pk>/', UserInvitationList.as_view(), name='invitations'),
     path('user/notifications/<int:pk>/', NotificationsView.as_view(), name='notifications'),
     path('user/type/', UserTypeView.as_view(), name='user_type'),
+    path('reset_password/', ResetPasswordView.as_view(), name='reset_password'),
 
     path('api/', include(router.urls)),
     path('api/notification/<int:pk>/', NotificationDetailsAPIView.as_view()),
