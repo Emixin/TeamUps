@@ -203,3 +203,13 @@ class Notification(models.Model):
             self.save()
             return f"user {self.user} has read the notification"
 
+
+
+class TeamRating(models.Model):
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+
+    class Meta:
+        unique_together = ('user', 'team')

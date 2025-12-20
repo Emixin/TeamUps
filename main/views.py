@@ -11,7 +11,8 @@ from django.urls import reverse_lazy, reverse
 from django.shortcuts import redirect
 from django.core.cache import caches
 from django.core.mail import send_mail
-from .models import Task, Team, User, Invitation, Notification
+from django.db import transaction, IntegrityError
+from .models import Task, Team, User, Invitation, Notification, TeamRating
 from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm, ResetPasswordForm
 from .utils import handle_form, handle_invitation
 
@@ -39,7 +40,7 @@ class HomePageView(DetailView):
         counts = cache.get(cache_key)
 
         if not counts:
-            print("Cache MISS | recalculating counts")
+            print("Cache MISS")
             counts = {
                 "users_count": User.objects.filter(is_superuser=False).count(),
                 "teams_count": Team.objects.count(),
@@ -273,6 +274,7 @@ class TeamListView(LoginRequiredMixin, ListView):
         return Team.objects.filter(members=user)
     
     def post(self, request):
+        user = request.user
         team_name = request.POST.get("rated_team")
         team_obj = Team.objects.filter(name=team_name).first()
         new_score = request.POST.get("score")
@@ -281,7 +283,14 @@ class TeamListView(LoginRequiredMixin, ListView):
             messages.error(request, "Team not found!")
             return redirect('teams')
         
-        team_obj.recalculate_teamwork_score(new_score)
+        try:
+            with transaction.atomic():
+                TeamRating.objects.create(user=user, team=team_obj, rating=new_score)        
+                team_obj.recalculate_teamwork_score(new_score)
+                
+        except IntegrityError:
+            messages.error(request, "You have rated this team before!")
+
         return redirect('teams')
 
 
