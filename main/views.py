@@ -12,7 +12,7 @@ from django.shortcuts import redirect
 from django.core.cache import caches
 from django.core.mail import send_mail
 from django.db import transaction, IntegrityError
-from .models import Task, Team, User, Invitation, Notification, TeamRating
+from .models import Task, Team, User, Invitation, Notification, TeamRating, UserRating
 from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm, ResetPasswordForm
 from .utils import handle_form, handle_invitation
 
@@ -354,17 +354,17 @@ class UsersRatingList(LoginRequiredMixin, ListView):
     
     def post(self, request):
         new_score = request.POST.get("score")
-        rated_user = request.POST.get("rated_user")
 
+        rated_user = request.POST.get("rated_user")
         rated_user = User.objects.filter(username=rated_user).first()
+
+        user = request.user
         
         if not rated_user:
             messages.error(request, "User not found!")
             return redirect('ratings')
         
         rated_user_teams = Team.objects.filter(members=rated_user)
-
-        user = request.user
         user_teams = Team.objects.filter(members=user)
 
         if not user_teams or not rated_user_teams:
@@ -372,8 +372,14 @@ class UsersRatingList(LoginRequiredMixin, ListView):
             return redirect('ratings')
 
         if new_score and rated_user and rated_user_teams.intersection(user_teams).exists():
-            rated_user.score = rated_user.calculate_new_score(int(new_score))
-            return redirect('ratings')
+            with transaction.atomic():
+                try:
+                    UserRating.objects.create(rater=user, rated=rated_user, rating=new_score)
+                    rated_user.score = rated_user.calculate_new_score(int(new_score))
+                except IntegrityError:
+                    messages.error(request, "You have rated this user before!")
+                    
+                return redirect('ratings')
         
         messages.error(request, "You are not in the same team!")
         return redirect('ratings')

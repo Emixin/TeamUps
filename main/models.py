@@ -213,3 +213,13 @@ class TeamRating(models.Model):
 
     class Meta:
         unique_together = ('user', 'team')
+
+
+class UserRating(models.Model):
+
+    rater = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rater')
+    rated = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rated')
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+
+    class Meta:
+        unique_together = ('rater', 'rated')
