@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
 from .models import Notification, Task, Team, Invitation
 from .utils import push_notification
@@ -11,12 +11,6 @@ def notify_task_creation(sender, instance, created, **kwargs):
         Notification.objects.create(user=instance.created_by, message=f"Task '{instance.title}' created!")
         push_notification(instance.created_by.username, f"Task {instance.title} created!")
 
-
-@receiver(post_save, sender=Team)
-def notify_team_creation(sender, instance , created, **kwargs):
-    if created: 
-        Notification.objects.create(user=instance.leader, message=f"Team {instance.name} created!")
-        push_notification(instance.leader.username, f"Team {instance.name} created!")
 
 
 @receiver(post_save, sender=Invitation)

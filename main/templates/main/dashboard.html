@@ -41,7 +41,7 @@
                     {% if user.bio %}
                         <p>{{ user.bio }}</p>
                     {% else %}
-                        <a>No bio!</a>
+                        <a>Your bio</a>
                     {% endif %}
                 </div>
 
@@ -66,9 +66,7 @@
                 <p>Create a Team</p>
                 <form method="post">
                     {% csrf_token %}
-                    {% cache 60 team_form user.id %}
                         {{ team_form.as_p }}
-                    {% endcache %}
                     <button type="submit" name="create_team">Create Team</button>
                 </form>
             </div>

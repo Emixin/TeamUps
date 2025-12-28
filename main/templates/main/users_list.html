@@ -4,6 +4,8 @@
     <title>Users List</title>
         {% load static %}
         <link rel="stylesheet" href="{% static 'main/styles.css' %}">
+        <link rel="stylesheet" href="{% static 'main/users_list_styles.css' %}">
+
 </head>
 <body>
 
@@ -38,7 +40,7 @@
     {% if messages %}
     <ul>
         {% for message in messages %}
-        <li class="{{ meesage.tags }}">{{ message }}</li>
+        <li class="{{ message.tags }}">{{ message }}</li>
         {% endfor %}
     </ul>
     {% endif %}

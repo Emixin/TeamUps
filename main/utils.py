@@ -46,17 +46,18 @@ def handle_form(request, form, success_message, extra_kwargs=None, redirect_url=
     extra_kwargs is a dictionary of additional fields to set before saving
     """
     
-    if form.is_valid():
-        obj = form.save(commit=False)
+    if not form.is_valid():
+        return False, form
+    
+    obj = form.save()
 
-        if extra_kwargs:
-            for key, value in extra_kwargs.items():
-                setattr(obj, key, value)
+    if extra_kwargs:
+        for key, value in extra_kwargs.items():
+            setattr(obj, key, value)
 
-        obj.save()
-        messages.success(request, success_message)
-        return redirect(redirect_url)
-    return form
+    obj.save()
+    messages.success(request, success_message)
+    return True, obj
 
 
 def avatar_upload_path_generator(instance, filename):

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
-from .models import Team, Task
+from .models import Team, Task, LeaderShipInvitation
 from .learning_model.matchmaker import predict_user_type
 
 
@@ -70,10 +70,13 @@ class TeamForm(forms.ModelForm):
         if commit:
             team.save()
             team.members.add(self.user)
-            leader = self.cleaned_data['leader']
-            if leader not in team.members.all():
-                team.members.add(leader)
         return team
+    
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        if Team.objects.filter(name=name).exists():
+            raise forms.ValidationError("A team with this name already exists!")
+        return name
 
 
 class TaskForm(forms.ModelForm):

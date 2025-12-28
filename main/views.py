@@ -12,7 +12,7 @@ from django.shortcuts import redirect
 from django.core.cache import caches
 from django.core.mail import send_mail
 from django.db import transaction, IntegrityError
-from .models import Task, Team, User, Invitation, Notification, TeamRating, UserRating
+from .models import Task, Team, User, Invitation, Notification, TeamRating, UserRating, LeaderShipInvitation
 from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm, ResetPasswordForm
 from .utils import handle_form, handle_invitation
 
@@ -174,20 +174,53 @@ class DashboardView(LoginRequiredMixin, DetailView):
             return result
         
         if "create_team" in request.POST:
-            team_form = TeamForm(request.POST, user=request.user)
-            result = handle_form(request,
+            form_data = request.POST.copy()
+
+            leader_id = form_data["leader"]
+            if leader_id:
+                invited_leader_id = User.objects.filter(id=leader_id).first()
+            
+            else:
+                team_form = TeamForm(form_data, user=request.user)
+                team_form.add_error('leader', 'Select a leader!')
+                context = self.get_context_data()
+                context["team_form"] = team_form
+                return self.render_to_response(context)
+
+            if invited_leader_id == request.user:
+                team_form = TeamForm(form_data, user=request.user)
+                success, result = handle_form(request,
                                  form=team_form,
                                  success_message="New Team Created!")
-            
-            if isinstance(result, TeamForm):
+
+            else:
+                no_leader_data = form_data.copy()
+                no_leader_data.pop("leader", None)
+
+                team_form = TeamForm(no_leader_data, user=request.user)
+
+                success, result = handle_form(request,
+                                 form=team_form,
+                                 success_message="New Team Created!")
+                
+                LeaderShipInvitation.objects.create(team=result, invited_user=invited_leader_id, invited_by=request.user)
+                
+
+            if not success:
                 context = self.get_context_data()
                 context["team_form"] = result
                 return self.render_to_response(context)
+      
             
-            return result
+            Notification.objects.create(user=request.user, message=f"New Team {result.name} Created!")
+            return redirect('dashboard')
         
         if "upload_avatar" in request.POST:
-            avatar = request.FILES["avatar"]
+            avatar = request.FILES.get("avatar")
+
+            if not avatar:
+                return redirect('dashboard')
+
             user = self.get_object()
             user.avatar = avatar
             user.save()
@@ -205,7 +238,9 @@ class UserInvitationList(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
-        user_invitations = Invitation.objects.filter(invited_user=user)
+        member_invitations = Invitation.objects.filter(invited_user=user).exclude(pk__in=LeaderShipInvitation.objects.values('pk'))
+        leadership_invitations = LeaderShipInvitation.objects.filter(invited_user=user)
+        user_invitations = list(member_invitations) + list(leadership_invitations)
         return user_invitations
     
     def post(self, request, **kwargs):
@@ -221,8 +256,15 @@ class UserInvitationList(LoginRequiredMixin, ListView):
         invited_by = User.objects.filter(username=invited_by).first()
 
         if invited_by and invited_user and invitation_team:
-            invitation = Invitation.objects.filter(team=invitation_team, invited_user=invited_user, invited_by=invited_by).first()
-            invitation = handle_invitation(request, invitation, result)
+
+            leadership_invitation = LeaderShipInvitation.objects.filter(team=invitation_team, invited_user=invited_user, invited_by=invited_by).first()
+            if leadership_invitation:
+                invitation = handle_invitation(request, leadership_invitation, result)
+
+
+            member_invitation = Invitation.objects.filter(team=invitation_team, invited_user=invited_user, invited_by=invited_by).first()   
+            if member_invitation and not leadership_invitation:
+                invitation = handle_invitation(request, member_invitation, result)
 
         user_id = kwargs.get("pk")
         return redirect('invitations', pk=user_id)

@@ -112,7 +112,7 @@ class Team(models.Model):
     name = models.CharField(max_length=20, unique=True)
     members = models.ManyToManyField(User, related_name="teams")
     max_members = models.PositiveIntegerField(default=5)
-    leader = models.ForeignKey(User, on_delete=models.CASCADE, related_name="led_teams")
+    leader = models.ForeignKey(User, on_delete=models.CASCADE, related_name="led_teams", null=True, blank=True)
     teamwork_score = models.DecimalField(max_digits=2,
                                          decimal_places=1,
                                          validators=[MinValueValidator(1.0), MaxValueValidator(5.0)],
@@ -186,6 +186,38 @@ class Invitation(models.Model):
 
             return f"user {self.invited_user} declined the invitation!"
         return "Invitation already handled"
+    
+    @property
+    def class_name(self):
+        return self.__class__.__name__
+
+
+
+class LeaderShipInvitation(Invitation):
+    
+    def accept(self):
+        if self.status == 'PENDING':
+            self.team.add_member(self.invited_user)
+            self.team.leader = self.invited_user
+            self.team.save()
+            self.status = 'ACCEPTED'
+            self.save()
+
+            Notification.objects.create(user=self.invited_user, message=f"{self.invited_user} has accepted the leadership of {self.team}")
+
+            return f"user {self.invited_user} became the leader!"
+        return "Invitation already handled"
+
+    def decline(self):
+        if self.status == 'PENDING':
+            self.status = 'DECLINED'
+            self.save()
+
+            Notification.objects.create(user=self.invited_user, message=f"{self.invited_user} has declined the leadership of {self.team}")
+
+            return f"user {self.invited_user} declined the invitation!"
+        return "Invitation already handled"
+
 
 
 

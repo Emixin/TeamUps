@@ -12,8 +12,11 @@
     {% for invitation in invitations %}
         <div class="invitation-card">
             <p class="invitation-details">
-                Invited by: <strong>{{ invitation.invited_by }}</strong> | 
-                Status: <span>{{ invitation.status }}</span>
+                Invited by: <strong>{{ invitation.invited_by }}</strong> |
+                Status: <span>{{ invitation.status }}</span> |
+                Invitaion Type: <span>{{ invitation.class_name }}</span> |
+                Date: <span>{{ invitation.created_at }}</span> |
+                Team: <span>{{ invitation.team.name }}</span>
             </p>
 
             <form method="post">
