@@ -3,29 +3,32 @@
 <head>
     <title>Tasks List</title>
         {% load static %}
-        <link rel="stylesheet" href="{% static 'main/styles.css' %}">
+        <link rel="stylesheet" href="{% static 'main/tasks_list.css' %}">
 </head>
 <body>
 
     <h1>All Tasks</h1>
 
-    {% for task in tasks %}
-      <li>
-        - title: {{ task.title }}
-        - team: {{ task.team }}
-        - creator: {{ task.created_by }}
-        - deadline: {{ task.deadline }}
-        <form method="post" style="display:inline">
-            {% csrf_token %}
-            <input type="hidden" name="task_title" value="{{ task.title }}">
-            <input type="number" name="extra_time" required>Enter extra days amount
-            <button type="submit">Set New Deadline</button>
-        </form>
-      </li>
+    <div class="tasks_list_container">
+      {% for task in tasks %}
+      
+        <li>
+          - title: {{ task.title }}
+          - team: {{ task.team }}
+          - creator: {{ task.created_by }}
+          - deadline: {{ task.deadline }}
+          <form method="post" style="display:inline">
+              {% csrf_token %}
+              <input type="hidden" name="task_title" value="{{ task.title }}">
+              <input type="number" name="extra_time" required>Enter extra days amount
+              <button type="submit">Set New Deadline</button>
+          </form>
+        </li>
     
-    {% empty %}
-      <p>No Tasks yet!</p>
-    {% endfor %}
+      {% empty %}
+        <p>No Tasks yet!</p>
+      {% endfor %}
+    </div>
 
     <div class="pagination">
       {% if page_obj.has_previous %}

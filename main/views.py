@@ -162,36 +162,41 @@ class DashboardView(LoginRequiredMixin, DetailView):
 
         if "create_task" in request.POST:
             task_form = TaskForm(request.POST, user_led_teams=Team.objects.filter(leader=user))
-            result = handle_form(request,
+            success, result = handle_form(request,
                                  form=task_form,
                                  success_message="New task created!", extra_kwargs={"created_by": user})
             
-            if isinstance(result, TaskForm):
+            if not success:
                 context = self.get_context_data()
                 context["task_form"] = result
                 return self.render_to_response(context)
             
-            return result
+            return redirect('dashboard')
         
         if "create_team" in request.POST:
             form_data = request.POST.copy()
 
             leader_id = form_data["leader"]
-            if leader_id:
-                invited_leader_id = User.objects.filter(id=leader_id).first()
-            
-            else:
+            if not leader_id:
                 team_form = TeamForm(form_data, user=request.user)
                 team_form.add_error('leader', 'Select a leader!')
                 context = self.get_context_data()
                 context["team_form"] = team_form
                 return self.render_to_response(context)
 
+
+            invited_leader_id = User.objects.filter(id=leader_id).first()
+                
             if invited_leader_id == request.user:
                 team_form = TeamForm(form_data, user=request.user)
                 success, result = handle_form(request,
                                  form=team_form,
                                  success_message="New Team Created!")
+
+                if not success:
+                    context = self.get_context_data()
+                    context["team_form"] = result
+                    return self.render_to_response(context)
 
             else:
                 no_leader_data = form_data.copy()
@@ -202,16 +207,15 @@ class DashboardView(LoginRequiredMixin, DetailView):
                 success, result = handle_form(request,
                                  form=team_form,
                                  success_message="New Team Created!")
+
+                if not success:
+                    context = self.get_context_data()
+                    context["team_form"] = result
+                    return self.render_to_response(context)
                 
                 LeaderShipInvitation.objects.create(team=result, invited_user=invited_leader_id, invited_by=request.user)
                 
 
-            if not success:
-                context = self.get_context_data()
-                context["team_form"] = result
-                return self.render_to_response(context)
-      
-            
             Notification.objects.create(user=request.user, message=f"New Team {result.name} Created!")
             return redirect('dashboard')
         
@@ -380,7 +384,7 @@ class TeamDetailsView(LoginRequiredMixin, DetailView):
             team_obj.save()
             return redirect('team_details', pk=team_id)
         
-        messages.error("User not found!")
+        messages.error(request, "User not found!")
         return redirect('team_details', pk=team_id)
 
 

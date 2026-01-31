@@ -121,14 +121,27 @@ CHANNEL_LAYERS = {
 
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
-    'default': {
+    'sqlite': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    },
+    'mysql': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'teamups_db',
+        'USER': 'root',
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    },
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'teamups',
+        'USER': 'postgres',
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
 }
 
 

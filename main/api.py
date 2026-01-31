@@ -259,7 +259,7 @@ class NotificationDetailsAPIView(APIView):
 
 
     def get(self, request, pk=None):
-        notification = get_object_or_404(Notification, id=pk, invited_user=request.user)
+        notification = get_object_or_404(Notification, id=pk, user=request.user)
         serializer = NotificationSerializer(notification)
         return Response(serializer.data)
 
