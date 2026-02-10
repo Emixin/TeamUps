@@ -139,7 +139,7 @@ DATABASES = {
         'NAME': 'teamups',
         'USER': 'postgres',
         'PASSWORD': env('DB_PASSWORD'),
-        'HOST': 'localhost',
+        'HOST': 'db', # change it to 'localhost' before trying to run in local machine!
         'PORT': '5432',
     },
 }

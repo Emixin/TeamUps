@@ -29,6 +29,7 @@ numpy @ file:///C:/miniconda3/conda-bld/numpy_and_numpy_base_1757670256083/work/
 packaging==25.0
 pandas @ file:///C:/b/abs_58a1hlvjeo/croot/pandas_1756466410850/work/dist/pandas-2.3.2-cp313-cp313-win_amd64.whl#sha256=e3d25986bd6f7ec53acbba8bf94ee4f49c11b115835d0b9a4c62809e4f788a80
 pillow==12.0.0
+psycopg2==2.9.11
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
 pycparser==2.23
