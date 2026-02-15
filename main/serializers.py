@@ -6,7 +6,8 @@ from .models import Team, Invitation, User, Task, Notification
 class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
-        fields = "__all__"
+        fields = ["name", "max_members", "leader"]
+
 
 class SendTeamInvitationSerializer(serializers.Serializer):
     invited_user_id = serializers.IntegerField(min_value=1)
@@ -15,7 +16,7 @@ class SendTeamInvitationSerializer(serializers.Serializer):
 class InvitationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invitation
-        fields = "__all__"
+        fields = ["team", "invited_user"]
 
     
 class RemoveMemberSerializer(serializers.Serializer):

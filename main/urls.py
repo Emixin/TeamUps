@@ -12,7 +12,7 @@ from .views import (DashboardView, MySignUpView,
 
 from rest_framework.routers import DefaultRouter
 
-from .api import (
+from .interfaces import (
     InvitationViewSet, UserViewSet, TaskViewSet, NotificationViewSet,
     NotificationDetailsAPIView, TeamViewSet
 )

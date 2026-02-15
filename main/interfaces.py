@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Team, Invitation, User, Task, Notification
+from .models import LeaderShipInvitation, Team, Invitation, User, Task, Notification
 
 from .serializers import (
     TeamSerializer, InvitationSerializer, UserSerializer,
@@ -28,7 +28,10 @@ class TeamViewSet(viewsets.ModelViewSet):
         return Team.objects.filter(members=self.request.user)
     
     def perform_create(self, serializer: TeamSerializer) -> None:
-        serializer.save(leader=self.request.user)
+        team = serializer.save(leader=None)
+        invited_user = serializer.validated_data["leader"]
+        LeaderShipInvitation.objects.create(team=team, invited_by=self.request.user, invited_user=invited_user)
+        
 
     def _leadership_checker(self, team: Team) -> Response | None:
         if team.leader != self.request.user:
@@ -41,7 +44,7 @@ class TeamViewSet(viewsets.ModelViewSet):
         check_result = self._leadership_checker(team)
         if check_result:
             return check_result
-        return super().update(self, request, *args, **kwargs)
+        return super().update(request, *args, **kwargs)
     
     def partial_update(self, request, *args, **kwargs):
         team = self.get_object()
@@ -69,13 +72,11 @@ class TeamViewSet(viewsets.ModelViewSet):
         if check_result:
             return check_result
 
-        team = self.get_object()
         serializer = SendTeamInvitationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         invited_user_id = serializer.validated_data["invited_user_id"]
         invited_user = User.objects.filter(id=invited_user_id).first()
-        invitation = Invitation.objects.create(team=team, invited_user=invited_user, invited_by=request.user)
-        invitation.save()
+        Invitation.objects.create(team=team, invited_user=invited_user, invited_by=request.user)
         return Response({"message": "Invitation is sent!"})
     
     @action(detail=True, methods=["get", "post"])
@@ -83,7 +84,7 @@ class TeamViewSet(viewsets.ModelViewSet):
 
         if request.method == "GET":
             serializer = RemoveMemberSerializer()
-            return Response(request.data)
+            return Response(serializer.data)
         
         team = self.get_object()
         check_result = self._leadership_checker(team)
@@ -120,11 +121,12 @@ class InvitationViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         with transaction.atomic():
-            invitation = serializer.save(invited_by=request.user)
+            user = request.user
+            invitation = serializer.save(invited_by=user)
 
             Notification.objects.create(
                 user=invitation.invited_user,
-                message=f"You have a new invitation from {request.user}!"
+                message=f"You have a new invitation from {user}!"
             )
 
         headers = self.get_success_headers(serializer.data)
@@ -133,10 +135,16 @@ class InvitationViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get", "post"])
     def accept(self, request, pk=None):
-        invitation = self.get_queryset().filter(id=pk).first()
+        invitation = self.get_queryset().filter(id=pk)
+
+        if not invitation.exists():
+            return Response({"error": "No such invitation exists!"},
+                            status=status.HTTP_404_NOT_FOUND)
+        
+        invitation = invitation.first()
         
         if request.user != invitation.invited_user:
-            return Response({"error": "You can only accept your own invitations."},
+            return Response({"error": "You can only accept invitations sent to you."},
                             status=status.HTTP_403_FORBIDDEN)
         
         result = invitation.accept()
@@ -148,8 +156,12 @@ class InvitationViewSet(viewsets.ModelViewSet):
     def decline(self, request, pk=None):
         invitation = self.get_queryset().filter(id=pk).first()
 
+        if not invitation:
+            return Response({"error": "No such invitation exists!"},
+                            status=status.HTTP_404_NOT_FOUND)
+
         if request.user != invitation.invited_user:
-            return Response({"error": "You can only decline your own invitations."},
+            return Response({"error": "You can only decline invitations sent to you."},
                             status=status.HTTP_403_FORBIDDEN)
         
         result = invitation.decline()
@@ -157,7 +169,7 @@ class InvitationViewSet(viewsets.ModelViewSet):
         return Response({"message": result}, status=status.HTTP_200_OK)
 
 
-
+# TODO: review from here
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
