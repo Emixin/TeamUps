@@ -169,32 +169,39 @@ class InvitationViewSet(viewsets.ModelViewSet):
         return Response({"message": result}, status=status.HTTP_200_OK)
 
 
-# TODO: review from here
+
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
 
+    def get_queryset(self):
+        return User.objects.exclude(id=self.request.user.id)
+
+
     def perform_update(self, serializer):
-        user = self.get_object()
-        if self.request.user == user:
-            raise ValidationError({"message": "You can't rate yourself!"})
-        
-        rater_teams = Team.objects.filter(members=self.request.user)
-        rated_teams = Team.objects.filter(members=user)
-        if not rated_teams.intersection(rater_teams).exists():
+        rated_user = self.get_object()
+        rater_user_teams = Team.objects.filter(members=self.request.user)
+        rated_user_teams = Team.objects.filter(members=rated_user)
+        if not rated_user_teams.intersection(rater_user_teams).exists():
             raise ValidationError({"message": "You can only rate your teammates!"})
 
         rate = serializer.validated_data["score"]
-        user.calculate_new_score(rate)
-        user.save()
+        rated_user.calculate_new_score(rate)
         return super().perform_update(serializer)
-    
 
-    @action(detail=True, methods=["get", "post"])
-    def toggle_availability(self, request, pk=None):
-        user = self.get_object()
+
+
+class ToggleAvailabilityAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = User.objects.filter(id=request.user.id).first()
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+    def post(self, request):
+        user = request.user
         user.change_availability()
         return Response({"message": f"Availability changed to {user.is_available}"})
 
@@ -210,36 +217,47 @@ class TaskViewSet(viewsets.ModelViewSet):
     ordering_fields = ['deadline', 'created_at']
 
     def get_queryset(self):
-        return Task.objects.filter(created_by=self.request.user)
+        user_teams = Team.objects.filter(members=self.request.user)
+        return Task.objects.filter(team__in=user_teams)
 
 
     @action(detail=True ,methods=["get", "post"])
     def mark_as_completed(self, request, pk=None):
         task = self.get_object()
-        if task.team.leader != self.request.user:
+        if task.team.leader != request.user:
             return  Response({"message": "Only team leaders can do this!"},
                              status=status.HTTP_403_FORBIDDEN)
         task.change_status()
         task.save()
-        return Response({"message": "Task marked as completed!"},
-                        status=status.HTTP_200_OK)
+        return Response({"message": "Task marked as completed!"}, status=status.HTTP_200_OK)
     
-    @action(detail=True, methods=["get", "post"])
-    def extend_deadline(self, request, pk=None):
-        task = self.get_object()
-        if task.team.leader != self.request.user:
-            return Response({"message": "Only team leaders can do this!"})
+
+
+class ExtendDeadlineAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+
+    def get(self, request, pk=None):
+        task = get_object_or_404(Task, id=pk)
+        serializer = TaskSerializer(task)
+        return Response(serializer.data)
+
+
+    def post(self, request, pk=None):
+        task = get_object_or_404(Task, id=pk)
+        if task.team.leader != request.user:
+            return Response({"message": "Only team leaders can do this!"}, status=status.HTTP_403_FORBIDDEN)
+        
         if task.status == "COMPLETED":
-            return Response({"message": "Task is already completed!"})
+            return Response({"message": "Task is already completed!"}, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer = ExtendDeadlineSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         extra_days = serializer.validated_data["extra_days"]
         result = task.renew_deadline(extra_days)
-        return Response({"message": {result}},
-                        status=status.HTTP_200_OK)
+        return Response({"message": result}, status=status.HTTP_200_OK)
 
         
-
 
 class NotificationViewSet(viewsets.ModelViewSet):
     serializer_class = NotificationSerializer
@@ -249,37 +267,10 @@ class NotificationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user)
     
-    def perform_update(self, serializer):
-        notifications = Notification.objects.filter(user=self.request.user).all()
-        for notification in notifications:
-            notification.mark_as_read()
-            notification.save()
-        return super().perform_update(serializer)
-    
     @action(detail=False, methods=["get", "post"])
     def mark_all_as_read(self, request):
         notifications = Notification.objects.filter(user=request.user)
         for notification in notifications:
             notification.mark_as_read()
-            notification.save()
-        return Response({"message": "All notifications are marked as read!"})
-    
-
-
-class NotificationDetailsAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-
-
-    def get(self, request, pk=None):
-        notification = get_object_or_404(Notification, id=pk, user=request.user)
-        serializer = NotificationSerializer(notification)
-        return Response(serializer.data)
-
-
-    def post(self, request, pk=None):
-        notification = get_object_or_404(Notification, id=pk)
-        notification.mark_as_read()
-        notification.save()
-        serializer = NotificationSerializer(notification)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({"message": "All notifications are marked as read!"}, status=status.HTTP_200_OK)
 

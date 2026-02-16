@@ -14,13 +14,13 @@ from rest_framework.routers import DefaultRouter
 
 from .interfaces import (
     InvitationViewSet, UserViewSet, TaskViewSet, NotificationViewSet,
-    NotificationDetailsAPIView, TeamViewSet
+    TeamViewSet, ToggleAvailabilityAPIView, ExtendDeadlineAPIView
 )
 
 
 router = DefaultRouter()
 router.register(r'invitations', InvitationViewSet)
-router.register(r'users', UserViewSet)
+router.register(r'users', UserViewSet, basename='user')
 router.register(r'tasks', TaskViewSet, basename='task')
 router.register(r'notifications', NotificationViewSet, basename='notification')
 router.register(r'teams', TeamViewSet, basename='team')
@@ -43,5 +43,6 @@ urlpatterns = [
     path('reset_password/', ResetPasswordView.as_view(), name='reset_password'),
 
     path('api/', include(router.urls)),
-    path('api/notification/<int:pk>/', NotificationDetailsAPIView.as_view()),
+    path('api/user/', ToggleAvailabilityAPIView.as_view()),
+    path('api/extend_deadline/<int:pk>/', ExtendDeadlineAPIView.as_view()),
 ]
