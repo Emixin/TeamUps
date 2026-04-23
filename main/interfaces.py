@@ -74,10 +74,19 @@ class TeamViewSet(viewsets.ModelViewSet):
 
         serializer = SendTeamInvitationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         invited_user_id = serializer.validated_data["invited_user_id"]
-        invited_user = User.objects.filter(id=invited_user_id).first()
+        invited_user = get_object_or_404(User, id=invited_user_id)
+        
+        if invited_user == request.user:
+            return Response({"message": "You can't invite yourself!"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if invited_user in team.members.all():
+            return Response({"message": "You can't invite a teammate!"}, status=status.HTTP_400_BAD_REQUEST)
+        
         Invitation.objects.create(team=team, invited_user=invited_user, invited_by=request.user)
-        return Response({"message": "Invitation is sent!"})
+
+        return Response({"message": "Invitation is sent!"}, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=["get", "post"])
     def remove_member(self, request, pk=None):
@@ -98,10 +107,11 @@ class TeamViewSet(viewsets.ModelViewSet):
         user = User.objects.filter(username=username).first()
 
         if not user in team.members.all():
-            return Response({"message": "There is no such user in the team to remove!"})
+            return Response({"message": "There is no such user in the team to remove!"},
+                            status=status.HTTP_400_BAD_REQUEST)
         
         team.remove_member(user=user)
-        return Response({"message": "User has been removed!"})
+        return Response({"message": "User has been removed!"}, status=status.HTTP_200_OK)
 
 
 

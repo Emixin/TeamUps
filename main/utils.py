@@ -1,7 +1,7 @@
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from django.contrib import messages 
-from django.shortcuts import redirect
+from django.apps import apps
 
 
 
@@ -66,3 +66,12 @@ def avatar_upload_path_generator(instance, filename):
      to avoid filename conflicts.
      """
      return f"avatars/{instance.username}/{filename}"
+
+
+
+def get_notification_model():
+     """
+     This function returns Notification model.
+     """
+     return apps.get_model('main', 'Notification')
+

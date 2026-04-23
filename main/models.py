@@ -8,6 +8,8 @@ from .managers import (
 )
 from .utils import avatar_upload_path_generator
 
+from .signals import invitation_acceptence, member_removal, leadership_invitation_acceptence
+
 
 class User(AbstractUser):
 
@@ -141,6 +143,9 @@ class Team(models.Model):
         if self.members.filter(id=user.id).exists():
             self.members.remove(user)
             self.save()
+
+            member_removal.send(sender=self.__class__ , removed_user=user, team=self)
+
             return f"the user {user.username} has been deleted!"
         return f"the user {user.username} is not a member of the team!"
         
@@ -172,7 +177,7 @@ class Invitation(models.Model):
             self.status = 'ACCEPTED'
             self.save()
 
-            Notification.objects.create(user=self.invited_user, message=f"{self.invited_user} has accepted the invite to {self.team}")
+            invitation_acceptence.send(sender=self.__class__, instance=self, result="accepted")
 
             return f"user {self.invited_user} joined the team!"
         return "Invitation already handled or team is full"
@@ -182,13 +187,14 @@ class Invitation(models.Model):
             self.status = 'DECLINED'
             self.save()
 
-            Notification.objects.create(user=self.invited_user, message=f"{self.invited_user} has declined the invite to {self.team}")
+            invitation_acceptence.send(sender=self.__class__, instance=self, result="declined")
 
             return f"user {self.invited_user} declined the invitation!"
         return "Invitation already handled"
     
     @property
     def class_name(self):
+        """This method returns the class name string for external identifications."""
         return self.__class__.__name__
 
 
@@ -203,7 +209,7 @@ class LeaderShipInvitation(Invitation):
             self.status = 'ACCEPTED'
             self.save()
 
-            Notification.objects.create(user=self.invited_user, message=f"{self.invited_user} has accepted the leadership of {self.team}")
+            leadership_invitation_acceptence.send(sender=self.__class__, instance=self, result="accepted")
 
             return f"user {self.invited_user} became the leader!"
         return "Invitation already handled"
@@ -213,7 +219,7 @@ class LeaderShipInvitation(Invitation):
             self.status = 'DECLINED'
             self.save()
 
-            Notification.objects.create(user=self.invited_user, message=f"{self.invited_user} has declined the leadership of {self.team}")
+            leadership_invitation_acceptence.send(sender=self.__class__, instance=self, result="declined")
 
             return f"user {self.invited_user} declined the invitation!"
         return "Invitation already handled"

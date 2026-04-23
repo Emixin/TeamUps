@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
-from .models import Team, Task, LeaderShipInvitation
+from .models import Team, Task
 from .learning_model.matchmaker import predict_user_type
 
 
@@ -32,8 +32,8 @@ class MySignUpForm(UserCreationForm):
     type = forms.ChoiceField(choices=[('AI-PRED', 'AI-Pred')] + User.CHARACTER_TYPES, required=True)
     skills = forms.CharField(max_length=100, required=True)
 
-    password1 = forms.CharField(label="Password", strip=False, widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}), help_text="")
-    password2 = forms.CharField(label="Confirm Password", strip=False, widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}), help_text="")
+    password1 = forms.CharField(label="Password", strip=False, widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}), help_text="password")
+    password2 = forms.CharField(label="Confirm Password", strip=False, widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}), help_text="confirm password")
     
     class Meta:
         model = User
@@ -61,7 +61,7 @@ class TeamForm(forms.ModelForm):
         fields = ['name', 'max_members', 'leader']
 
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user', None)
+        self.creator = kwargs.pop('creator', None)
         super().__init__(*args, **kwargs)
         self.fields["leader"].queryset = User.objects.filter(is_superuser=False)
 
@@ -69,7 +69,7 @@ class TeamForm(forms.ModelForm):
         team = super().save(commit=False)
         if commit:
             team.save()
-            team.members.add(self.user)
+            team.members.add(self.creator)
         return team
     
     def clean_name(self):

@@ -188,7 +188,7 @@ class DashboardView(LoginRequiredMixin, DetailView):
             invited_leader_id = User.objects.filter(id=leader_id).first()
                 
             if invited_leader_id == request.user:
-                team_form = TeamForm(form_data, user=request.user)
+                team_form = TeamForm(form_data, creator=request.user)
                 success, result = handle_form(request,
                                  form=team_form,
                                  success_message="New Team Created!")
