@@ -1,53 +1,17 @@
-asgiref==3.10.0
-attrs==25.4.0
-autobahn==25.10.2
-Automat==25.4.16
-Bottleneck @ file:///C:/b/abs_816hr2khp1/croot/bottleneck_1731058648110/work
-cffi==2.0.0
-channels==4.3.1
-channels_redis==4.3.0
-constantly==23.10.4
-cryptography==46.0.3
-daphne==4.2.1
-Django @ file:///C:/b/abs_732pccxzov/croot/django_1745263601709/work
-django-environ @ file:///home/conda/feedstock_root/build_artifacts/django-environ_1736796544732/work
-django-filter @ file:///home/conda/feedstock_root/build_artifacts/django-filter_1759697563568/work
-django-redis==6.0.0
+asgiref==3.9.1
+channels==4.3.2
+Django==5.2.5
+django-environ==0.12.0
+django-filter==25.2
 djangorestframework==3.16.1
-gunicorn==23.0.0
-hyperlink==21.0.0
-idna==3.11
-incremental==24.7.2
-joblib @ file:///C:/miniconda3/conda-bld/joblib_1757926362684/work
-mkl-service==2.4.0
-mkl_fft @ file:///C:/b/abs_64riv3lfyn/croot/mkl_fft_1751310924052/work
-mkl_random @ file:///C:/b/abs_47jvsmau4j/croot/mkl_random_1751310922820/work
-msgpack==1.1.2
-mysqlclient==2.2.7
-numexpr @ file:///C:/b/abs_3buvfgcf6r/croot/numexpr_1755766488094/work
-numpy @ file:///C:/miniconda3/conda-bld/numpy_and_numpy_base_1757670256083/work/dist/numpy-2.3.3-cp313-cp313-win_amd64.whl#sha256=d9474e66189cba52ea8e11316ddea0a38ae7f8fc06e3ef798d9bbfddc6ba51a5
-packaging==25.0
-pandas @ file:///C:/b/abs_58a1hlvjeo/croot/pandas_1756466410850/work/dist/pandas-2.3.2-cp313-cp313-win_amd64.whl#sha256=e3d25986bd6f7ec53acbba8bf94ee4f49c11b115835d0b9a4c62809e4f788a80
-pillow==12.0.0
-psycopg2==2.9.11
-pyasn1==0.6.1
-pyasn1_modules==0.4.2
-pycparser==2.23
-pyOpenSSL==25.3.0
-python-dateutil @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/python-dateutil_1729038406576/work
-pytz @ file:///C:/b/abs_f8wdzeix0n/croot/pytz_1752135878094/work
-redis==7.0.0
-scikit-learn @ file:///C:/b/abs_45qemhn4lg/croot/scikit-learn_1753427401078/work
-scipy @ file:///C:/miniconda3/conda-bld/scipy_1757315814389/work/dist/scipy-1.16.1-cp313-cp313-win_amd64.whl#sha256=5d210da8b34d75d142b4253e4453cc8e62ddf11e3038b472f8e308d0c332f768
-service-identity==24.2.0
-setuptools==72.1.0
-six @ file:///C:/b/abs_149wuyuo1o/croot/six_1744271521515/work
-sqlparse @ file:///C:/Users/dev-admin/buildout/croot/sqlparse_1739565583021/work
-threadpoolctl @ file:///C:/b/abs_3904pspv77/croot/threadpoolctl_1731006105881/work
-Twisted==25.5.0
-txaio==25.9.2
-typing_extensions @ file:///C:/b/abs_ecq8gc0vbm/croot/typing_extensions_1756281142218/work
-tzdata @ file:///croot/python-tzdata_1746123641790/work
+joblib==1.5.2
+numpy==2.3.3
+pillow==12.1.1
+scikit-learn==1.8.0
+scipy==1.16.2
+setuptools==80.9.0
+sqlparse==0.5.3
+threadpoolctl==3.6.0
+tzdata==2025.2
 wheel==0.45.1
 whitenoise==6.11.0
-zope.interface==8.0.1

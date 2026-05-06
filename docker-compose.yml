@@ -1,4 +1,9 @@
+version: '5.0'
+
+
 services:
+
+
   db:
     image: postgres:18.1-alpine
     container_name: teamups-db
@@ -14,13 +19,14 @@ services:
       POSTGRES-USER: postgres
       POSTGRES-PASSWORD: ${DB_PASSWORD}
 
+
   web:
     build: .
     container_name: teamups-web
     command: python manage.py runserver 0.0.0.0:8000
 
     volumes:
-      - .:/app
+      - .:/teamups-app
 
     ports:
       - "8000:8000"

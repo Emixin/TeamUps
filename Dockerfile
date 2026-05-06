@@ -1,7 +1,9 @@
-FROM condaforge/miniforge3:latest
+FROM python:3.12-slim
 
-COPY unix_requirements.txt .
-RUN pip install -r unix_requirements.txt
+ENV PIP_DISABLE_PIP_VERSION_CHECK 1
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
 COPY . .
 
