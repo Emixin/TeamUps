@@ -55,6 +55,19 @@ class MySignUpForm(UserCreationForm):
         return skills
 
 
+
+class DeleteUserAccountForm(forms.Form):
+    deletion_magic_words = "i want to delete my account"
+    confirm_deletion = forms.CharField(widget=forms.TextInput(attrs={"placeholder": f"{deletion_magic_words}"}))
+
+    def clean_confirm_deletion(self):
+        typed_words = self.cleaned_data.get("confirm_deletion").lower()
+        if not typed_words == self.deletion_magic_words:
+            raise forms.ValidationError("Please type the magic words!")
+        return typed_words
+    
+
+
 class TeamForm(forms.ModelForm):
     class Meta:
         model = Team

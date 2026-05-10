@@ -7,7 +7,7 @@ from .views import (TaskListView, TeamListView, HomePageView, MyLoginView,
 from .views import (DashboardView, MySignUpView,
                     UsersRatingList, TeamDetailsView,
                     UserInvitationList, NotificationsView,
-                    ResetPasswordView
+                    ResetPasswordView, DeleteUserAccountView
 )
 
 from rest_framework.routers import DefaultRouter
@@ -31,6 +31,7 @@ urlpatterns = [
     path('', HomePageView.as_view(), name='home'),
     path('login/', MyLoginView.as_view(), name='login'),
     path('signup/', MySignUpView.as_view(), name='signup'),
+    path('delete_account/', DeleteUserAccountView.as_view(), name='delete_account'),
     path('logout/', MyLogoutView.as_view(), name='logout'),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
     path('tasks/', TaskListView.as_view(), name='tasks'),

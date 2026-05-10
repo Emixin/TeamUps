@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>Delete Account</head>
+
+<body>
+
+    <form method="post">
+        <p>Are You Sure?</p>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Delete My Account!</button>
+    </form>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+</body>
+
+</html>

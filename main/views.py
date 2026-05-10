@@ -13,7 +13,7 @@ from django.core.cache import caches
 from django.core.mail import send_mail
 from django.db import transaction, IntegrityError
 from .models import Task, Team, User, Invitation, Notification, TeamRating, UserRating, LeaderShipInvitation
-from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm, ResetPasswordForm
+from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm, ResetPasswordForm, DeleteUserAccountForm
 from .utils import handle_form, handle_invitation
 
 
@@ -124,6 +124,24 @@ class MySignUpView(CreateView):
 
     def get_success_url(self):
         return f"{reverse_lazy('user_type')}?type={self.object.type}"
+    
+
+
+class DeleteUserAccountView(LoginRequiredMixin, FormView):
+    form_class = DeleteUserAccountForm
+    template_name = 'main/delete.html'
+
+    def post(self, request):
+        form = DeleteUserAccountForm(data=request.POST)
+        succeeded = form.is_valid()
+        if succeeded:
+            user = User.objects.filter(id=self.request.user.id)
+            user.delete()
+            messages.success(request, "Your account has been removed!")
+            return redirect('home')
+        
+        messages.error(request, "Please type 'i want to delete my account' to confirm deletion!")
+        return redirect('delete_account')
     
 
 

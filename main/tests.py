@@ -1,5 +1,6 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from .forms import TeamForm, MySignUpForm
 from .models import Team
 
@@ -54,3 +55,43 @@ class MySignUpFormTests(TestCase):
 
             self.assertNotEqual(None, user.skills)
             self.assertNotEqual("", user.skills)
+
+
+
+class DeleteUserAccountViewTests(TestCase):
+      def setUp(self):
+            self.client = Client()
+
+            self.user = User.objects.create(username="user1", email="user1@gmail.com",
+                                             type="leader", skills="Django, Python")
+            self.user.set_password("user1password")
+            self.user.save()
+
+            self.path = reverse('delete_account')
+            
+
+      def test_user_typed_same_value(self):
+            self.client.login(username="user1", password="user1password")
+            
+            
+            same_value = {"confirm_deletion": "i want to delete my account"}
+            self.client.post(self.path, same_value)
+
+            self.assertFalse(User.objects.filter(id=self.user.id).exists())
+
+
+      def user_typed_other_values(self):
+            self.client.login(username="user1", password="user1password")
+
+
+            wrong_value = {"confirm_deletion": "i wanna delete my account"}
+            self.client.post(self.path, wrong_value)
+
+            self.assertTrue(User.objects.filter(id=self.user.id).exists())
+
+
+            uppercase_value = {"confirm_deletion": "I Want To Delete My Account"}
+            self.client.post(self.path, uppercase_value)
+
+            self.assertFalse(User.objects.filter(id=self.user.id).exists())
+
