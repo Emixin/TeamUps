@@ -95,3 +95,56 @@ class DeleteUserAccountViewTests(TestCase):
 
             self.assertFalse(User.objects.filter(id=self.user.id).exists())
 
+
+
+class HomePageViewTests(TestCase):
+      def setUp(self):
+            self.client = Client()
+
+
+            self.user = User.objects.create(username="user3", email="user3@gmail.com",
+                                             type="leader", skills="Django, Python")
+            self.user.set_password("user3password")
+            self.user.save()
+
+
+      def test_homepage_for_unauthorized_users(self):
+            respone = self.client.get(reverse("home"))
+            self.assertEqual(respone.status_code, 200)
+
+
+      def test_homepage_for_authorized_users(self):
+            result = self.client.login(username="user3", password="user3password")
+            response = self.client.get(reverse("home"))
+            self.assertEqual(result, True)
+            self.assertEqual(response.status_code, 200)
+
+
+
+
+class ResetPasswordViewTests(TestCase):
+      def setUp(self):
+            self.client = Client()
+
+
+            self.user = User.objects.create(username="user3", email="user3@gmail.com",
+                                             type="leader", skills="Django, Python") 
+            self.user.set_password("user3password")
+            self.user.save()
+
+            self.path = reverse("reset_password")
+
+
+      def test_password_is_changed_successfully(self):
+
+            url = self.path + '?email=user3@gmail.com'
+            self.client.get(url)
+            
+
+            form_data = {"new_password": "newuser3password", "confirm_password": "newuser3password"}
+            self.client.post(self.path, form_data)
+
+
+            result = self.client.login(username="user3", password="newuser3password")
+            self.assertTrue(result, True)
+

@@ -58,8 +58,15 @@ class ResetPasswordView(FormView):
     template_name = "main/reset_password.html"
     form_class = ResetPasswordForm
 
-    def post(self, request):
+
+    def get(self, request, *args, **kwargs):
         email = request.GET.get("email")
+        request.session['email'] = email
+        return super().get(request, *args, **kwargs)
+    
+
+    def post(self, request):
+        email = request.session.get('email')
         password = request.POST.get("new_password")
         user = User.objects.filter(email=email).first()
 
