@@ -1,5 +1,6 @@
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
+from django.contrib.messages import get_messages
 from django.urls import reverse
 from .forms import TeamForm, MySignUpForm
 from .models import Team
@@ -132,13 +133,18 @@ class ResetPasswordViewTests(TestCase):
             self.user.set_password("user3password")
             self.user.save()
 
-            self.path = reverse("reset_password")
+            self.path = reverse("reset_password") + '?email=user3@gmail.com'
+
+
+      def test_get_method(self):
+            self.client.login(username="user3", password="user3password")
+            response = self.client.get(self.path)
+            self.assertEqual(response.status_code, 200)
 
 
       def test_password_is_changed_successfully(self):
 
-            url = self.path + '?email=user3@gmail.com'
-            self.client.get(url)
+            self.client.get(self.path)
             
 
             form_data = {"new_password": "newuser3password", "confirm_password": "newuser3password"}
@@ -148,3 +154,46 @@ class ResetPasswordViewTests(TestCase):
             result = self.client.login(username="user3", password="newuser3password")
             self.assertTrue(result, True)
 
+
+      def test_password_is_not_changed(self):
+            self.client.get(self.path)
+            
+
+            form_data = {"new_password": "newuser3password", "confirm_password": "wrongpassword"}
+            self.client.post(self.path, form_data)
+
+
+            result = self.client.login(username="user3", password="newuser3password")
+            self.assertFalse(result, True)
+
+            result = self.client.login(username="user3", password="user3password")
+            self.assertTrue(result, True)
+
+
+
+class MyLoginViewTests(TestCase):
+      def setUp(self):
+            self.client = Client()
+
+            self.user = User.objects.create(username="user3", email="user3@gmail.com",
+                                             type="leader", skills="Django, Python") 
+            self.user.set_password("user3password")
+            self.user.save()
+
+            self.path = reverse('login')
+
+
+      def test_user_forgot_password(self):
+            response = self.client.post(self.path, {'user_email': 'user@gmail.com'}, follow=True)
+            message_obj = list(get_messages(response.wsgi_request))[0]
+            self.assertEqual(message_obj.message, 'The email is not found!')
+
+
+            response = self.client.post(self.path, {'user_email': 'user3@gmail.com'}, follow=True)
+            message_obj = list(get_messages(response.wsgi_request))[0]
+            self.assertEqual(message_obj.message, 'Password reset link has been sent!')
+
+
+      # TODO: Complete this test later
+      def test_form_validation(self):
+            pass
