@@ -49,7 +49,7 @@ def handle_form(request, form, success_message, extra_kwargs=None, redirect_url=
     if not form.is_valid():
         return False, form
     
-    obj = form.save()
+    obj = form.save(commit=False)
 
     if extra_kwargs:
         for key, value in extra_kwargs.items():

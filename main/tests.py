@@ -241,15 +241,22 @@ class DashboardViewTests(TestCase):
             self.team = Team.objects.create(name='team1')
 
             self.team.add_member(self.user)
+            self.team.leader = self.user
             self.team.save()
 
             self.path = reverse('dashboard')
 
 
-      # TODO: Complete this test later
       def test_create_task(self):
-            form_data = {'title': 'task1', 'deadline': '2026-12-25', 'team': 'team1', 'task_type': 'TESTING'}
-            response = self.client.post(self.path, form_data, 'create_task', follow=True)
+            request_data = {'title': 'task1', 'deadline': '2026-12-25', 'team': self.team.id, 'task_type': 'TESTING', 'create_task': ''}
 
-            self.assertTrue(response.status_code, 302)
+            result = self.client.login(username='user3', password='user3password')
+            self.assertTrue(result)
 
+            response = self.client.post(self.path, request_data)
+            self.assertEqual(response.status_code, 302)
+
+
+      # TODO: Complete this test
+      def test_create_team(self):
+            pass

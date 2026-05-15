@@ -175,15 +175,16 @@ class DashboardView(LoginRequiredMixin, DetailView):
         return self.request.user
     
     def get_context_data(self, **kwargs):
+        "Set the object attribute for get_context_data() method"
+        self.object = self.get_object()
+
         context = super().get_context_data(**kwargs)
-        user = self.request.user
         context["team_form"] = TeamForm()
-        context["task_form"] = TaskForm(user_led_teams=Team.objects.filter(leader=user))
+        context["task_form"] = TaskForm(user_led_teams=Team.objects.filter(leader=self.object))
         return context
     
     def post(self, request):
-        user = self.request.user
-        self.object = self.get_object()
+        user = self.get_object()
 
         if "create_task" in request.POST:
             task_form = TaskForm(request.POST, user_led_teams=Team.objects.filter(leader=user))

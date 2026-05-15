@@ -102,4 +102,5 @@ class TaskForm(forms.ModelForm):
         led_teams = kwargs.pop("user_led_teams", Team.objects.none())
         super().__init__(*args, **kwargs)
         self.fields["team"].queryset = led_teams
+        self.fields["team"].required = True
 
