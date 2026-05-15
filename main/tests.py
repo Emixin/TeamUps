@@ -259,4 +259,23 @@ class DashboardViewTests(TestCase):
 
       # TODO: Complete this test
       def test_create_team(self):
-            pass
+            request_data = {'name': 'team2', 'max_members': 3, 'leader': self.user.id, 'create_team': ''}
+
+            result = self.client.login(username='user3', password='user3password')
+            self.assertTrue(result)
+
+            response = self.client.post(self.path, request_data, follow=True)
+            message_obj = list(get_messages(response.wsgi_request))[0]
+            self.assertEqual(message_obj.message, "New Team Created!")
+
+
+            request_data = {'name': 'team3', 'max_members': 6, 'leader': self.user.id, 'create_team': ''}
+
+            result = self.client.login(username='user3', password='user3password')
+            self.assertTrue(result)
+
+            response = self.client.post(self.path, request_data)
+            team_form_obj = response.context.get('team_form')
+            [error_message] = team_form_obj.errors.as_data()['max_members'][0]
+            self.assertEqual(error_message, 'Max members value should be less than five!')
+

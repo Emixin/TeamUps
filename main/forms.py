@@ -90,7 +90,16 @@ class TeamForm(forms.ModelForm):
         if Team.objects.filter(name=name).exists():
             raise forms.ValidationError("A team with this name already exists!")
         return name
-
+    
+    def clean_max_members(self):
+        max_members = self.cleaned_data['max_members']
+        if max_members < 0:
+            raise forms.ValidationError('Max members value should be more than zero!')
+        if max_members > 5:
+            raise forms.ValidationError('Max members value should be less than five!')
+        return max_members
+        
+        
 
 class TaskForm(forms.ModelForm):
     class Meta:
