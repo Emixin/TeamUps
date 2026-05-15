@@ -39,7 +39,7 @@ class User(AbstractUser):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-
+    # BUG: Float precision error after many updates
     def calculate_new_score(self, new_score):
         self.score_count += 1
         if self.score:

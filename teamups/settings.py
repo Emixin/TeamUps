@@ -11,7 +11,7 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool("DEBUG", default=True)
 
 
-
+# NOTE: Used dual settings rather than using a default one
 """
 These settings are based on the environment.
 
@@ -120,7 +120,7 @@ CHANNEL_LAYERS = {
 
 
 
-
+# HACK: Temporary workaround to switch databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',

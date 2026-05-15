@@ -22,7 +22,7 @@ class InvitationSerializer(serializers.ModelSerializer):
 class RemoveMemberSerializer(serializers.Serializer):
     username_to_remove = serializers.CharField()
 
-
+# FIXME: UserSerializer allows writing to email and score fields
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

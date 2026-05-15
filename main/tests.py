@@ -194,6 +194,62 @@ class MyLoginViewTests(TestCase):
             self.assertEqual(message_obj.message, 'Password reset link has been sent!')
 
 
+            response = self.client.post(self.path, {'user_email': 'usr3@gmail.com'})
+            message_obj = list(get_messages(response.wsgi_request))[0]
+            self.assertEqual(message_obj.message, 'The email is not found!')
+
+
+      def test_form_validates_email(self):
+            form_data = {"email_or_username": "user3@gmail.com", "password": "user3password"}
+
+            response = self.client.post(self.path, form_data)
+            self.assertEqual(response.status_code, 302)
+
+
+            form_data = {"email_or_username": "usr3@gmail.com", "password": "user3password"}
+
+            response = self.client.post(self.path, form_data)
+            message_obj = list(get_messages(response.wsgi_request))[0]
+            self.assertEqual(message_obj.message, "Incorrect username or password")
+
+
+      def test_form_validates_username(self):
+            form_data = {"email_or_username": "user3", "password": "user3password"}
+
+            response = self.client.post(self.path, form_data)
+            self.assertEqual(response.status_code, 302)
+
+
+            form_data = {"email_or_username": "usr3", "password": "user3password"}
+
+            response = self.client.post(self.path, form_data)
+            message_obj = list(get_messages(response.wsgi_request))[0]
+            self.assertEqual(message_obj.message, "Incorrect username or password")
+
+
+
+class DashboardViewTests(TestCase):
+      def setUp(self):
+            self.client = Client()
+
+            self.user = User.objects.create(username="user3", email="user3@gmail.com",
+                                             type="leader", skills="Django, Python")
+            
+            self.user.set_password("user3password")
+            self.user.save()
+
+            self.team = Team.objects.create(name='team1')
+
+            self.team.add_member(self.user)
+            self.team.save()
+
+            self.path = reverse('dashboard')
+
+
       # TODO: Complete this test later
-      def test_form_validation(self):
-            pass
+      def test_create_task(self):
+            form_data = {'title': 'task1', 'deadline': '2026-12-25', 'team': 'team1', 'task_type': 'TESTING'}
+            response = self.client.post(self.path, form_data, 'create_task', follow=True)
+
+            self.assertTrue(response.status_code, 302)
+
