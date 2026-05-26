@@ -1,2 +1,5 @@
 .venv/
 .env
+main/__pycache__
+main/learning_model/__pycache__
+teamups/__pycache__
