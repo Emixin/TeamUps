@@ -75,7 +75,19 @@ class TeamViewSet(viewsets.ModelViewSet):
         serializer = SendTeamInvitationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+
+        users_list = []
+        search_str = serializer.validated_data["search_str"]
+        if search_str:  
+            searching_result = User.objects.filter(username__icontains=search_str)
+            for user in searching_result:
+                users_list.append((user.username, user.id))
+
         invited_user_id = serializer.validated_data["invited_user_id"]
+        if invited_user_id == 0:
+            return Response({"searching_result": users_list}, status=status.HTTP_200_OK)
+
+
         invited_user = get_object_or_404(User, id=invited_user_id)
         
         if invited_user == request.user:
@@ -86,7 +98,7 @@ class TeamViewSet(viewsets.ModelViewSet):
         
         Invitation.objects.create(team=team, invited_user=invited_user, invited_by=request.user)
 
-        return Response({"message": "Invitation is sent!"}, status=status.HTTP_200_OK)
+        return Response({"message": "Invitation is sent!", "searching_result": users_list}, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=["get", "post"])
     def remove_member(self, request, pk=None):

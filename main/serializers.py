@@ -10,7 +10,14 @@ class TeamSerializer(serializers.ModelSerializer):
 
 
 class SendTeamInvitationSerializer(serializers.Serializer):
-    invited_user_id = serializers.IntegerField(min_value=1)
+    invited_user_id = serializers.IntegerField(min_value=0, allow_null=True)
+    search_str = serializers.CharField(max_length=20, allow_blank=True)
+
+    def validate_invited_user_id(self, value):
+        user_id = value
+        if not user_id:
+            user_id = 0
+        return user_id
 
 
 class InvitationSerializer(serializers.ModelSerializer):
