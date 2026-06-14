@@ -23,6 +23,19 @@
 }
 
 
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.site-logo {
+    width: 8vw;
+    height: auto;
+}
+
+
 .stat-box {
     display: flex;
     align-items: center;

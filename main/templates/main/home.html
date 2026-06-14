@@ -5,11 +5,16 @@
     <title>TeamUps</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'main/homepage_styles.css' %}">
+    <link rel="icon" href="{% static 'main/TeamUps.ico' %}">
 </head>
 
 <body>
     <div class="home-container">
-        <h1>Welcome to TeamUps!</h1>
+
+        <div class="header">
+            <img src="{% static 'main/TeamUps.png' %}" alt="TeamUps logo" class="site-logo">
+            <h1>Welcome to TeamUps!</h1>
+        </div>
 
         <div class="home-stats">
             <p>Collaborate, organize, and succeed together</p>
