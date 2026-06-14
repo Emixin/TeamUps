@@ -16,3 +16,4 @@ tzdata==2025.2
 wheel==0.45.1
 whitenoise==6.11.0
 psycopg==3.3.4
+channels-redis==4.3.0
