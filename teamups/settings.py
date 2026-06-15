@@ -10,7 +10,7 @@ env.read_env(env_file=BASE_DIR / ".env")
 
 SECRET_KEY = env('SECRET_KEY')
 
-DEBUG = False
+DEBUG = True
 
 
 # NOTE: Used dual settings rather than using a default one
