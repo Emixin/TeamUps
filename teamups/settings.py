@@ -13,39 +13,17 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = True
 
 
-# NOTE: Used dual settings rather than using a default one
-"""
-These settings are based on the environment.
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = True
+SECURE_HSTS_SECONDS = 86400
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
 
-When DEBUG = True (development):
-    - The site runs on HTTP.
-    - HTTPS-only security features are disabled to avoid local issues.
+# This will be updated with the real domain name before deploying to production!
+my_domain = "teamups.onrender.com"
 
-When DEBUG = False (production):
-    - The site must run on HTTPS.
-    - Secure cookies and redirects are enforced to protect user data.
-"""
-if not DEBUG:
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SECURE = True
-    SECURE_SSL_REDIRECT = True
-    SECURE_HSTS_SECONDS = 86400
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-
-    # This will be updated with the real domain name before deploying to production!
-    my_domain = "teamups.onrender.com"
-    
-    ALLOWED_HOSTS = [my_domain]
-
-else:
-    CSRF_COOKIE_SECURE = False
-    SESSION_COOKIE_SECURE = False
-    SECURE_SSL_REDIRECT = False
-    SECURE_HSTS_SECONDS = 0
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
-    SECURE_HSTS_PRELOAD = False
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.0.3']
+ALLOWED_HOSTS = [my_domain]
 
 
 # Application definition
