@@ -34,7 +34,7 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
 
     # This will be updated with the real domain name before deploying to production!
-    my_domain = 'teamups.com'
+    my_domain = "teamups.onrender.com"
     
     ALLOWED_HOSTS = [my_domain]
 
