@@ -1,5 +1,7 @@
 from pathlib import Path
 import environ
+import dj_database_url
+import os
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -120,28 +122,8 @@ CHANNEL_LAYERS = {
 
 
 
-# HACK: Temporary workaround to switch databases
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # },
-    # 'mysql': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'teamups_db',
-    #     'USER': 'root',
-    #     'PASSWORD': env('DB_PASSWORD'),
-    #     'HOST': '127.0.0.1',
-    #     'PORT': '3306',
-    # },
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'teamups',
-        'USER': 'postgres',
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': 'db', # Use localhost for postgres when running without docker
-        'PORT': '5432',
-    },
+    "default": dj_database_url.parse(os.environ.get("DATABASE_URL"))
 }
 
 
