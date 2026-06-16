@@ -10,7 +10,7 @@ env.read_env(env_file=BASE_DIR / ".env")
 
 SECRET_KEY = env('SECRET_KEY')
 
-DEBUG = True
+DEBUG = False
 
 
 CSRF_COOKIE_SECURE = True
