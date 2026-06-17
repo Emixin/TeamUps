@@ -122,7 +122,7 @@ CHANNEL_LAYERS = {
 
 # HACK: Temporary workaround to switch databases
 DATABASES = {
-    # 'default': {
+    # 'sqlite': {
     #     'ENGINE': 'django.db.backends.sqlite3',
     #     'NAME': BASE_DIR / 'db.sqlite3',
     # },
@@ -134,14 +134,22 @@ DATABASES = {
     #     'HOST': '127.0.0.1',
     #     'PORT': '3306',
     # },
+    # 'postgres': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'teamups',
+    #     'USER': 'postgres',
+    #     'PASSWORD': env('DB_PASSWORD'),
+    #     'HOST': 'db', # Use localhost for postgres when running without docker
+    #     'PORT': '5432',
+    # },
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django_pg8000',
         'NAME': 'teamups',
         'USER': 'postgres',
         'PASSWORD': env('DB_PASSWORD'),
-        'HOST': 'db', # Use localhost for postgres when running without docker
-        'PORT': '5432',
-    },
+        'HOST': 'localhost',
+        'PORT': 5432,
+    }
 }
 
 
