@@ -43,3 +43,10 @@ def notify_leadership_acceptence(sender, instance, result, **kwargs):
     Notification = get_notification_model()
     Notification.objects.create(user=instance.invited_by,
                                 message=f"User {instance.invited_user.username} {result} the leadership invitaion for the team {instance.team.name}")
+
+
+greetings_sent = Signal()
+@receiver(greetings_sent)
+def notify_greetings_message(sender, instance, **kwargs):
+    Notification = get_notification_model()
+    Notification.objects.create(user=instance.greeted_user, message=f"Hello from {instance.user_greeted}!")

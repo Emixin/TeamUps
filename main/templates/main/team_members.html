@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Teammates List</title>
+    </head>
+    <body>
+        {% for member in members %}
+            <li>{{ member.username }}</li>
+            <a href="{% url 'say_hello' pk=member.id %}">Say Hello to {{ member.username }}</a>
+        {% empty %}
+            <a>You don't have any teammates!</a>
+        {% endfor %}
+    </body>
+</html>

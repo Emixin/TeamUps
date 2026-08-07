@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Say hello to new team member!</title>
+    </head>
+    <body>
+        <form method="post">
+            {% csrf_token %}
+            <input type="string" name="extra_message">
+            <a>You Can Send Extra Words!</a>
+            <button type="submit">Hello</button>
+        </form>
+        {% if messages %}
+            {% for message in messages %}
+                <p>{{message}}</p>
+            {% endfor %}
+        {% endif %}
+    </body>
+</html>

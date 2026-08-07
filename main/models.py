@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, IntegrityError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
 from datetime import timedelta
@@ -8,7 +8,7 @@ from .managers import (
 )
 from .utils import avatar_upload_path_generator
 
-from .signals import invitation_acceptence, member_removal, leadership_invitation_acceptence
+from .signals import invitation_acceptence, member_removal, leadership_invitation_acceptence, greetings_sent
 
 
 class User(AbstractUser):
@@ -231,7 +231,8 @@ class LeaderShipInvitation(Invitation):
 class Notification(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
-    message = models.CharField(max_length=25)
+    # NOTE: Increased max_length to allow longer notification messages and prevent database errors.
+    message = models.CharField(max_length=255)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -261,3 +262,20 @@ class UserRating(models.Model):
 
     class Meta:
         unique_together = ('rater', 'rated')
+
+
+# TODO: Define a model so team members can greet a new member!
+class Greetings(models.Model):
+    user_greeted = models.ForeignKey(User, on_delete=models.CASCADE, related_name='greeter')
+    greeted_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='greeted')
+
+    def say_hello(self) -> bool:
+        try:
+            greetings_sent.send(sender=self.__class__, instance=self)
+            return True
+        # TODO: Show a message to user instead of IntegrityError!
+        except IntegrityError:
+            return False
+
+    class Meta:
+        unique_together = ('user_greeted', 'greeted_user')

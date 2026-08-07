@@ -12,12 +12,12 @@ from django.shortcuts import redirect
 from django.core.cache import caches
 from django.core.mail import send_mail
 from django.db import transaction, IntegrityError
-from .models import Task, Team, User, Invitation, Notification, TeamRating, UserRating, LeaderShipInvitation
+from .models import Task, Team, User, Invitation, Notification, TeamRating, UserRating, LeaderShipInvitation, Greetings
 from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm, ResetPasswordForm, DeleteUserAccountForm
 from .utils import handle_form, handle_invitation
 
-
-
+import logging
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -214,6 +214,7 @@ class DashboardView(LoginRequiredMixin, DetailView):
             invited_leader_id = User.objects.filter(id=leader_id).first()
                 
             if invited_leader_id == request.user:
+                # BUG: It seems leader does not automatically added as a member maybe its from the handle_form function
                 team_form = TeamForm(form_data, creator=request.user)
                 success, result = handle_form(request,
                                  form=team_form,
@@ -400,6 +401,7 @@ class TeamDetailsView(LoginRequiredMixin, DetailView):
         action = request.POST.get("action")
 
         if action == "add" and user == team_leader and selected_user_obj:
+            logger.debug(f"team_obj: {team_obj}\ninvited_user: {selected_user_obj}\ninvited_by: {team_leader}")
             invitation = Invitation.objects.create(team=team_obj, invited_user=selected_user_obj, 
                                                    invited_by=team_leader)
             invitation.save()
@@ -469,3 +471,40 @@ class NotificationsView(LoginRequiredMixin, ListView):
         notifications = Notification.objects.filter(user=user).order_by('-created_at')
         return notifications
 
+
+class SayHelloView(LoginRequiredMixin, DetailView):
+    model = User
+    template_name = "main/say_hello.html"
+    context_object_name = "user"
+
+    def get_object(self):
+        id = self.kwargs.get("pk")
+        user = User.objects.filter(pk=id).first()
+        return user
+
+    def post(self, request, pk):
+        # TODO: Add extra message later!
+        _ = request.POST.get("extra_message")
+
+        greeted_user = self.get_object()
+        greetings = Greetings(user_greeted=self.request.user, greeted_user=greeted_user)
+        done = greetings.say_hello()
+        if not done:
+            messages.error(request, "You sent greetings message before!")
+            return redirect("say_hello", pk=pk)
+        greetings.save()
+        messages.success(request, "Greetings message sent!")
+        return redirect("say_hello", pk=pk)
+
+
+class TeamMembersView(LoginRequiredMixin, ListView):
+    model = User
+    template_name = "main/team_members.html"
+    context_object_name = "members"
+
+    def get_queryset(self):
+        query_set = Team.objects.filter(members=self.request.user)
+        members = set()
+        for team in query_set:
+            members |=  set(team.members.exclude(username=self.request.user.username))
+        return members
