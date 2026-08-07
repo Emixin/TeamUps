@@ -126,6 +126,7 @@ DATABASES = {
     #     'ENGINE': 'django.db.backends.sqlite3',
     #     'NAME': BASE_DIR / 'db.sqlite3',
     # },
+
     # 'mysql': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'teamups_db',
@@ -134,22 +135,34 @@ DATABASES = {
     #     'HOST': '127.0.0.1',
     #     'PORT': '3306',
     # },
-    # 'postgres': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': 'teamups',
-    #     'USER': 'postgres',
-    #     'PASSWORD': env('DB_PASSWORD'),
-    #     'HOST': 'db', # Use localhost for postgres when running without docker
-    #     'PORT': '5432',
-    # },
+
     'default': {
-        'ENGINE': 'django_pg8000',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'teamups',
         'USER': 'postgres',
         'PASSWORD': env('DB_PASSWORD'),
-        'HOST': 'localhost',
-        'PORT': 5432,
-    }
+        'HOST': 'localhost', # Use localhost for postgres when running without docker
+        'PORT': '5432',
+    },
+
+    # 'postgres': {
+    # 'ENGINE': 'django.db.backends.postgresql',
+    # 'NAME': 'teamups',
+    # 'USER': 'postgres',
+    # 'PASSWORD': env('DB_PASSWORD'),
+    # 'HOST': 'db', # Use localhost for postgres when running without docker
+    # 'PORT': '5432',
+    # },
+
+    # NOTE: Use the configuration below on windows for postgres
+    # 'postgres': {
+    #     'ENGINE': 'django_pg8000',
+    #     'NAME': 'teamups',
+    #     'USER': 'postgres',
+    #     'PASSWORD': env('DB_PASSWORD'),
+    #     'HOST': 'localhost',
+    #     'PORT': 5432,
+    # }
 }
 
 

@@ -2,7 +2,10 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from django.contrib import messages 
 from django.apps import apps
+from models import Team
+import logging
 
+logger = logging.getLogger(__name__)
 
 
 
@@ -56,6 +59,12 @@ def handle_form(request, form, success_message, extra_kwargs=None, redirect_url=
             setattr(obj, key, value)
 
     obj.save()
+
+    # TODO: Checkout this part
+    if isinstance(obj, Team):
+        obj.members.add(request.user)
+        logger.debug(f"team members after saving {obj.members}")
+    
     messages.success(request, success_message)
     return True, obj
 

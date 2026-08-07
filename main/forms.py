@@ -3,7 +3,9 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from .models import Team, Task
 from .learning_model.matchmaker import predict_user_type
+import logging
 
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -80,9 +82,7 @@ class TeamForm(forms.ModelForm):
 
     def save(self, commit=True):
         team = super().save(commit=False)
-        if commit:
-            team.save()
-            team.members.add(self.creator)
+        logger.debug(f"commit value is: {commit}")
         return team
     
     def clean_name(self):
