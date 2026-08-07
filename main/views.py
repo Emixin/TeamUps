@@ -15,6 +15,7 @@ from django.db import transaction, IntegrityError
 from .models import Task, Team, User, Invitation, Notification, TeamRating, UserRating, LeaderShipInvitation, Greetings
 from .forms import MyLoginForm, MySignUpForm, TeamForm, TaskForm, ResetPasswordForm, DeleteUserAccountForm
 from .utils import handle_form, handle_invitation
+from .signals import greetings_sent
 
 import logging
 logger = logging.getLogger(__name__)
@@ -488,11 +489,14 @@ class SayHelloView(LoginRequiredMixin, DetailView):
 
         greeted_user = self.get_object()
         greetings = Greetings(user_greeted=self.request.user, greeted_user=greeted_user)
+        
         done = greetings.say_hello()
         if not done:
             messages.error(request, "You sent greetings message before!")
             return redirect("say_hello", pk=pk)
+        
         greetings.save()
+        greetings_sent.send(sender=self.__class__, instance=self)
         messages.success(request, "Greetings message sent!")
         return redirect("say_hello", pk=pk)
 

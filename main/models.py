@@ -8,7 +8,7 @@ from .managers import (
 )
 from .utils import avatar_upload_path_generator
 
-from .signals import invitation_acceptence, member_removal, leadership_invitation_acceptence, greetings_sent
+from .signals import invitation_acceptence, member_removal, leadership_invitation_acceptence
 
 
 class User(AbstractUser):
@@ -270,12 +270,19 @@ class Greetings(models.Model):
     greeted_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='greeted')
 
     def say_hello(self) -> bool:
-        try:
-            greetings_sent.send(sender=self.__class__, instance=self)
-            return True
-        # TODO: Show a message to user instead of IntegrityError!
-        except IntegrityError:
+        # TODO: Check here if it handles the duplicates
+        is_duplicate = Greetings.objects.filter(user_greeted=self.user_greeted, greeted_user=self.greeted_user).exists()
+        if is_duplicate:
             return False
+
+        # TODO: Check if it works as expected
+        query1 = Team.objects.filter(members=self.greeted_user)
+        query2 = Team.objects.filter(members=self.user_greeted)
+        is_not_teammate = query1.filter(pk__in=query2).exists()
+        if is_not_teammate:
+            return False
+        
+        return True
 
     class Meta:
         unique_together = ('user_greeted', 'greeted_user')
