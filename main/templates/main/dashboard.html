@@ -4,7 +4,7 @@
 <head>
     <title>Dashboard</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'main/dashboard_styles.css' %}">
+    <link rel="stylesheet" href="{% static 'main/styles/dashboard_styles.css' %}">
     <link rel="icon" href="{% static 'main/TeamUps.ico' %}">
 </head>
     
@@ -101,8 +101,8 @@
         <script>
             const username = "{{ request.user.username }}"
             const socket = new WebSocket(`ws://${window.location.host}/ws/notifications/${username}/`);
-            socket.onmessage = function(e) {
-                const data = JSON.parse(e.data);
+            socket.onmessage = function(event) {
+                const data = JSON.parse(event.data);
                 alert("🔔 "+ data.message);
             };
         </script>

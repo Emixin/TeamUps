@@ -401,20 +401,19 @@ class TeamDetailsView(LoginRequiredMixin, DetailView):
         selected_user_obj = User.objects.filter(username=selected_user).first()
         action = request.POST.get("action")
 
-        if action == "add" and user == team_leader and selected_user_obj:
-            logger.debug(f"team_obj: {team_obj}\ninvited_user: {selected_user_obj}\ninvited_by: {team_leader}")
-            invitation = Invitation.objects.create(team=team_obj, invited_user=selected_user_obj, 
-                                                   invited_by=team_leader)
-            invitation.save()
-            return redirect('team_details', pk=team_id)
-
-        elif action == "remove" and user == team_leader and selected_user_obj:
-            team_obj.remove_member(selected_user_obj)
-            team_obj.save()
-            return redirect('team_details', pk=team_id)
-        
-        messages.error(request, "User not found!")
-        return redirect('team_details', pk=team_id)
+        match action:
+            case "add" if user == team_leader and selected_user_obj:
+                invitation = Invitation.objects.create(team=team_obj, invited_user=selected_user_obj, 
+                                                        invited_by=team_leader)
+                invitation.save()
+                return redirect('team_details', pk=team_id)
+            case "remove" if user == team_leader and selected_user_obj:
+                team_obj.remove_member(selected_user_obj)
+                team_obj.save()
+                return redirect('team_details', pk=team_id)
+            case _:
+                messages.error(request, "User not found!")
+                return redirect('team_details', pk=team_id)
 
 
 class UsersRatingList(LoginRequiredMixin, ListView):
